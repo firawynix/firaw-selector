@@ -119,13 +119,24 @@ class Escolha : JanelaFiraw
     Timer relogio;
     int restante;
 
-    // Modo enxuto recolhido: a janela nasce do tamanho de uma linha e cresce
-    // quando o mouse chega. As outras linhas continuam montadas, so ficam fora
-    // da area visivel — abrir e fechar vira uma mudanca de altura, sem remontar.
+    // Modo fantasma: os navegadores ficam todos a mostra o tempo todo; o que
+    // some e a MOLDURA — barra de titulo, botoes e o fundo por tras das linhas.
+    // Tudo isso volta quando o ponteiro chega, junto com o rodape.
     Timer vigia;
-    bool aberta;
-    int alturaRecolhida, alturaCheia;
+    bool revelada = true;
+    bool fantasma;
+    Panel rodape;
     string tituloBase;
+
+    /// <summary>
+    /// Cor que o Windows recorta da janela. Off-magenta de proposito: e uma cor
+    /// que nao aparece em icone de navegador nenhum, e um pixel igual a ela
+    /// viraria um furo na janela.
+    /// </summary>
+    static readonly Color Chave = Color.FromArgb(255, 0, 254);
+
+    /// <summary>Sai da janela de escolha e volta com o modo cheio.</summary>
+    public bool Reabrir;
 
     public Navegador Resultado;
     public bool Privativo;
@@ -160,6 +171,7 @@ class Escolha : JanelaFiraw
     {
         List<Navegador> lista = cfg.Visiveis();
         bool enxuto = cfg.Compacto;
+        fantasma = enxuto && cfg.Fantasma;
         int largura = enxuto ? 400 : 520;
         int y = enxuto ? 12 : 14;
 
@@ -215,28 +227,50 @@ class Escolha : JanelaFiraw
 
         if (enxuto)
         {
+            y += 4;
+
+            // Rodape: e por aqui que se chega nas Configuracoes e se volta ao
+            // modo cheio sem ter de abrir o Studio no meio da escolha.
+            rodape = new Panel();
+            rodape.Location = new Point(16, y);
+            rodape.Size = new Size(largura - 32, 30);
+            rodape.BackColor = C.Fundo;
+
+            Button bCfg = UI.Botao(Idioma.T("esc.configurar"), 0, 0, 130, delegate
+            {
+                AbreStudioDaEscolha();
+            }, false);
+            rodape.Controls.Add(bCfg);
+
+            Button bCheio = UI.Botao(Idioma.T("esc.modoCompleto"), 138, 0, 130, delegate
+            {
+                cfg.Compacto = false;
+                try { cfg.Salvar(); }
+                catch { }
+                Reabrir = true;
+                Close();
+            }, false);
+            rodape.Controls.Add(bCheio);
+
             lblConta = new Label();
-            lblConta.Location = new Point(16, y + 2);
-            lblConta.Size = new Size(largura - 32, 18);
+            lblConta.Location = new Point(276, 5);
+            lblConta.Size = new Size(rodape.Width - 276, 20);
             lblConta.ForeColor = C.Texto3;
-            lblConta.TextAlign = ContentAlignment.MiddleCenter;
-            Corpo.Controls.Add(lblConta);
+            lblConta.TextAlign = ContentAlignment.MiddleRight;
+            rodape.Controls.Add(lblConta);
 
-            alturaCheia = Barra.Height + y + (cfg.Tempo > 0 ? 24 : 8);
-            // Uma linha inteira + a folga de cima e de baixo.
-            alturaRecolhida = Barra.Height + 12 + (lista.Count > 0 ? 64 : 0) + 12;
+            Corpo.Controls.Add(rodape);
+            y += 38;
 
-            if (cfg.Recolhido && lista.Count > 1)
+            ClientSize = new Size(largura, Barra.Height + y);
+
+            if (fantasma)
             {
-                aberta = false;
-                ClientSize = new Size(largura, alturaRecolhida);
-                lblConta.Visible = false;
+                // A cor-chave vira buraco na janela: sobra so o que as linhas
+                // pintam por conta propria.
+                TransparencyKey = Chave;
+                Revela(false);
                 LigaVigia();
-            }
-            else
-            {
-                aberta = true;
-                ClientSize = new Size(largura, alturaCheia);
             }
             LigaContagem();
             return;
@@ -277,11 +311,23 @@ class Escolha : JanelaFiraw
 
         Label dica = new Label();
         dica.Location = new Point(16, y);
-        dica.Size = new Size(largura - 32, 18);
+        dica.Size = new Size(largura - 130, 18);
         dica.ForeColor = C.Texto3;
         dica.Font = new Font("Segoe UI", 7.9f);
         dica.Text = Idioma.T("esc.dica");
         Corpo.Controls.Add(dica);
+
+        // Atalho para o Studio sem sair da escolha.
+        Label cfgLink = new Label();
+        cfgLink.Location = new Point(largura - 112, y - 1);
+        cfgLink.Size = new Size(96, 18);
+        cfgLink.TextAlign = ContentAlignment.MiddleRight;
+        cfgLink.ForeColor = C.AcentoTexto;
+        cfgLink.Font = new Font("Segoe UI", 7.9f, FontStyle.Underline);
+        cfgLink.Cursor = Cursors.Hand;
+        cfgLink.Text = Idioma.T("esc.configurar");
+        cfgLink.Click += delegate { AbreStudioDaEscolha(); };
+        Corpo.Controls.Add(cfgLink);
         y += 26;
 
         ClientSize = new Size(largura, Barra.Height + y);
@@ -302,22 +348,35 @@ class Escolha : JanelaFiraw
             bool dentro;
             try { dentro = Bounds.Contains(Cursor.Position); }
             catch { return; }
-            if (dentro != aberta) Abre(dentro);
+            if (dentro != revelada) Revela(dentro);
         };
         vigia.Start();
     }
 
-    void Abre(bool abrir)
+    /// <summary>
+    /// Liga e desliga a moldura. O tamanho da janela nao muda: as linhas ficam
+    /// exatamente onde estavam, so o que esta atras delas e que aparece ou some.
+    /// </summary>
+    void Revela(bool mostrar)
     {
-        aberta = abrir;
-        // A janela cresce para baixo; a barra de titulo fica onde estava, e o
-        // ponteiro continua sobre a linha que a pessoa estava mirando.
-        ClientSize = new Size(ClientSize.Width, abrir ? alturaCheia : alturaRecolhida);
-        if (lblConta != null) lblConta.Visible = abrir;
-        if (!abrir) MostraContagem(restante > 0 ? Idioma.T("esc.auto", restante) : "");
+        revelada = mostrar;
+        Color fundo = mostrar ? C.Fundo : Chave;
+
+        BackColor = mostrar ? C.Linha : Chave;   // a moldura de 1px da janela
+        Corpo.BackColor = fundo;
+        Barra.BackColor = mostrar ? C.Painel : Chave;
+        foreach (Control c in Barra.Controls) c.Visible = mostrar;
+        Barra.Invalidate();
+
+        if (rodape != null)
+        {
+            rodape.BackColor = fundo;
+            foreach (Control c in rodape.Controls) c.Visible = mostrar;
+        }
+        if (!mostrar) MostraContagem(restante > 0 ? Idioma.T("esc.auto", restante) : "");
     }
 
-    /// <summary>Recolhida nao ha espaco para a contagem: ela vai para o titulo.</summary>
+    /// <summary>Escondida a moldura nao ha rodape: a contagem vai para o titulo.</summary>
     void MostraContagem(string txt)
     {
         if (tituloBase == null) tituloBase = Titulo;
@@ -329,6 +388,16 @@ class Escolha : JanelaFiraw
             return;
         }
         Titulo = txt.Length > 0 ? tituloBase + "  —  " + txt : tituloBase;
+    }
+
+    void AbreStudioDaEscolha()
+    {
+        string studio = Path.Combine(Amb.PastaExe, Amb.Produto + " Studio.exe");
+        try
+        {
+            if (File.Exists(studio)) System.Diagnostics.Process.Start(studio);
+        }
+        catch { }
     }
 
     void LigaContagem()
@@ -541,8 +610,15 @@ static class Programa
 
             if (n == null)
             {
-                Escolha janela = new Escolha(cfg, url);
-                Application.Run(janela);
+                Escolha janela;
+                // "Modo completo" no rodape fecha e reabre a janela ali mesmo,
+                // ja com a preferencia nova gravada.
+                while (true)
+                {
+                    janela = new Escolha(cfg, url);
+                    Application.Run(janela);
+                    if (!janela.Reabrir) break;
+                }
 
                 if (janela.Resultado == null)
                 {

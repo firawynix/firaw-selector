@@ -65,14 +65,36 @@ static class Ferramenta
         return IntPtr.Zero;
     }
 
-    static int Foto(string parte, string arquivo)
+    [DllImport("user32.dll")]
+    static extern bool SetCursorPos(int x, int y);
+
+    static int Rect(string parte)
+    {
+        IntPtr h = Acha(parte);
+        if (h == IntPtr.Zero) { Console.WriteLine("nao achei janela: " + parte); return 2; }
+        RECT r;
+        GetWindowRect(h, out r);
+        Console.WriteLine(r.L + " " + r.T + " " + (r.R - r.L) + " " + (r.B - r.T));
+        return 0;
+    }
+
+    static int Cursor(int x, int y)
+    {
+        SetCursorPos(x, y);
+        Console.WriteLine("ponteiro em " + x + "," + y);
+        return 0;
+    }
+
+    static int Foto(string parte, string arquivo, bool mover)
     {
         IntPtr h = Acha(parte);
         if (h == IntPtr.Zero) { Console.WriteLine("nao achei janela: " + parte); return 2; }
 
         // Sempre-no-topo por um instante: sem isso a foto pega o que estiver por
         // cima da janela, e ja peguei o Explorador no lugar do programa.
-        SetWindowPos(h, new IntPtr(-1), 80, 80, 0, 0, 0x41);
+        // Com "fixa" a janela nao sai do lugar — o que importa quando o teste
+        // depende de onde o ponteiro esta em relacao a ela.
+        SetWindowPos(h, new IntPtr(-1), 80, 80, 0, 0, mover ? 0x41u : 0x43u);
         System.Threading.Thread.Sleep(700);
 
         RECT r;
@@ -86,7 +108,7 @@ static class Ferramenta
                 g.CopyFromScreen(r.L, r.T, 0, 0, new Size(w, alt));
             bm.Save(arquivo, ImageFormat.Png);
         }
-        SetWindowPos(h, new IntPtr(-2), 80, 80, 0, 0, 0x41);
+        SetWindowPos(h, new IntPtr(-2), 80, 80, 0, 0, mover ? 0x41u : 0x43u);
         Console.WriteLine("ok: " + arquivo + "  (" + w + "x" + alt + ")  " + Titulo(h));
         return 0;
     }
@@ -123,8 +145,14 @@ static class Ferramenta
                 foreach (IntPtr h in Visiveis()) Console.WriteLine(Titulo(h));
                 return 0;
             case "foto":
-                if (args.Length < 3) { Console.WriteLine("foto <titulo> <saida.png>"); return 1; }
-                return Foto(args[1], args[2]);
+                if (args.Length < 3) { Console.WriteLine("foto <titulo> <saida.png> [fixa]"); return 1; }
+                return Foto(args[1], args[2], !(args.Length > 3 && args[3] == "fixa"));
+            case "rect":
+                if (args.Length < 2) { Console.WriteLine("rect <titulo>"); return 1; }
+                return Rect(args[1]);
+            case "cursor":
+                if (args.Length < 3) { Console.WriteLine("cursor <x> <y>"); return 1; }
+                return Cursor(int.Parse(args[1]), int.Parse(args[2]));
             case "clica":
                 if (args.Length < 3) { Console.WriteLine("clica <titulo> <botao>"); return 1; }
                 return Clica(args[1], args[2]);

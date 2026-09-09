@@ -929,17 +929,17 @@ class Studio : JanelaFiraw
         p.Controls.Add(cCompacto);
         y += 26;
 
-        // Recuada e presa ao modo enxuto: recolher so existe la dentro.
-        CheckBox cRecolhido = UI.Caixa(Idioma.T("op.recolhido"), 28, y, cfg.Recolhido);
-        cRecolhido.Enabled = cfg.Compacto;
-        cRecolhido.CheckedChanged += delegate { cfg.Recolhido = cRecolhido.Checked; Guarda(); };
-        p.Controls.Add(cRecolhido);
+        // Recuada e presa ao modo enxuto: tirar a moldura so existe la dentro.
+        CheckBox cFantasma = UI.Caixa(Idioma.T("op.fantasma"), 28, y, cfg.Fantasma);
+        cFantasma.Enabled = cfg.Compacto;
+        cFantasma.CheckedChanged += delegate { cfg.Fantasma = cFantasma.Checked; Guarda(); };
+        p.Controls.Add(cFantasma);
 
         cCompacto.CheckedChanged += delegate
         {
             cfg.Compacto = cCompacto.Checked;
-            cRecolhido.Enabled = cCompacto.Checked;
-            cRecolhido.Invalidate();
+            cFantasma.Enabled = cCompacto.Checked;
+            cFantasma.Invalidate();
             Guarda();
         };
         y += 40;

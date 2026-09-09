@@ -17,7 +17,7 @@ static class Amb
 {
     public const string Produto = "FirawSelector";
     public const string Marca = "Firawynix";
-    public const string Versao = "1.0.2";
+    public const string Versao = "1.0.3";
     public const string Site = "https://firawselector.firawynix.com.br";
     public const string Repo = "https://github.com/firawynix/firaw-selector";
 
@@ -376,6 +376,8 @@ static class Idioma
                        "No browser found. Open FirawSelector Studio.");
         A("esc.copiado", "Link copiado", "Link copied");
         A("esc.editarTit", "Editar o link antes de abrir", "Edit the link before opening");
+        A("esc.configurar", "Configurações", "Settings");
+        A("esc.modoCompleto", "Modo completo", "Full mode");
 
         // -------- abas do Studio --------
         A("aba.navegadores", "Navegadores", "Browsers");
@@ -477,8 +479,8 @@ static class Idioma
         A("op.esquecido", "Lembrados apagados.", "Remembered sites cleared.");
         A("op.compacto", "Janela de escolha enxuta: só ícone, nome e número",
                          "Slim picker: icon, name and number only");
-        A("op.recolhido", "Começar recolhida: só a primeira linha, e abre ao passar o mouse",
-                          "Start collapsed: only the first row, opens on mouse over");
+        A("op.fantasma", "Sem moldura: só as linhas flutuando — a janela aparece ao passar o mouse",
+                         "No frame: just the rows floating — the window shows up on mouse over");
         A("op.exportar", "Exportar configuração", "Export configuration");
         A("op.importar", "Importar configuração", "Import configuration");
         A("op.iniFiltro", "Configuração do FirawSelector (*.ini)|*.ini|Todos os arquivos|*.*",
