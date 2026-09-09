@@ -519,6 +519,8 @@ class Cfg
     public bool Log = false;
     /// <summary>Janela de escolha so com icone, nome e numero.</summary>
     public bool Compacto = false;
+    /// <summary>No modo enxuto, nasce mostrando so a primeira linha e abre no hover.</summary>
+    public bool Recolhido = false;
 
     public List<Navegador> Navegadores = new List<Navegador>();
     public List<Regra> Regras = new List<Regra>();
@@ -619,6 +621,7 @@ class Cfg
         c.ExpandirCurtas = Ini.Bool(g, "expandirCurtas", false);
         c.Log = Ini.Bool(g, "log", false);
         c.Compacto = Ini.Bool(g, "compacto", false);
+        c.Recolhido = Ini.Bool(g, "recolhido", false);
 
         if (s.ContainsKey("navegadores"))
         {
@@ -687,6 +690,7 @@ class Cfg
         sb.AppendLine("expandirCurtas=" + (ExpandirCurtas ? "1" : "0"));
         sb.AppendLine("log=" + (Log ? "1" : "0"));
         sb.AppendLine("compacto=" + (Compacto ? "1" : "0"));
+        sb.AppendLine("recolhido=" + (Recolhido ? "1" : "0"));
 
         sb.AppendLine();
         sb.AppendLine("[navegadores]");

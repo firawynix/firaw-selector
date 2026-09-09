@@ -119,6 +119,14 @@ class Escolha : JanelaFiraw
     Timer relogio;
     int restante;
 
+    // Modo enxuto recolhido: a janela nasce do tamanho de uma linha e cresce
+    // quando o mouse chega. As outras linhas continuam montadas, so ficam fora
+    // da area visivel — abrir e fechar vira uma mudanca de altura, sem remontar.
+    Timer vigia;
+    bool aberta;
+    int alturaRecolhida, alturaCheia;
+    string tituloBase;
+
     public Navegador Resultado;
     public bool Privativo;
     public bool Lembrar;
@@ -137,6 +145,12 @@ class Escolha : JanelaFiraw
         Corpo.BackColor = C.Fundo;
 
         Monta();
+
+        FormClosing += delegate
+        {
+            if (vigia != null) { vigia.Stop(); vigia = null; }
+            ParaContagem();
+        };
 
         KeyDown += Teclado;
         MouseMove += delegate { ParaContagem(); };
@@ -208,7 +222,22 @@ class Escolha : JanelaFiraw
             lblConta.TextAlign = ContentAlignment.MiddleCenter;
             Corpo.Controls.Add(lblConta);
 
-            ClientSize = new Size(largura, Barra.Height + y + (cfg.Tempo > 0 ? 24 : 8));
+            alturaCheia = Barra.Height + y + (cfg.Tempo > 0 ? 24 : 8);
+            // Uma linha inteira + a folga de cima e de baixo.
+            alturaRecolhida = Barra.Height + 12 + (lista.Count > 0 ? 64 : 0) + 12;
+
+            if (cfg.Recolhido && lista.Count > 1)
+            {
+                aberta = false;
+                ClientSize = new Size(largura, alturaRecolhida);
+                lblConta.Visible = false;
+                LigaVigia();
+            }
+            else
+            {
+                aberta = true;
+                ClientSize = new Size(largura, alturaCheia);
+            }
             LigaContagem();
             return;
         }
@@ -259,6 +288,49 @@ class Escolha : JanelaFiraw
         LigaContagem();
     }
 
+    /// <summary>
+    /// Vigia o ponteiro. MouseEnter/MouseLeave da janela nao servem aqui: os
+    /// filhos cobrem o corpo inteiro, entao a janela nunca recebe o evento — e
+    /// sair de um filho para outro dispararia "saiu" a toda hora.
+    /// </summary>
+    void LigaVigia()
+    {
+        vigia = new Timer();
+        vigia.Interval = 120;
+        vigia.Tick += delegate
+        {
+            bool dentro;
+            try { dentro = Bounds.Contains(Cursor.Position); }
+            catch { return; }
+            if (dentro != aberta) Abre(dentro);
+        };
+        vigia.Start();
+    }
+
+    void Abre(bool abrir)
+    {
+        aberta = abrir;
+        // A janela cresce para baixo; a barra de titulo fica onde estava, e o
+        // ponteiro continua sobre a linha que a pessoa estava mirando.
+        ClientSize = new Size(ClientSize.Width, abrir ? alturaCheia : alturaRecolhida);
+        if (lblConta != null) lblConta.Visible = abrir;
+        if (!abrir) MostraContagem(restante > 0 ? Idioma.T("esc.auto", restante) : "");
+    }
+
+    /// <summary>Recolhida nao ha espaco para a contagem: ela vai para o titulo.</summary>
+    void MostraContagem(string txt)
+    {
+        if (tituloBase == null) tituloBase = Titulo;
+
+        if (lblConta != null && lblConta.Visible)
+        {
+            lblConta.Text = txt;
+            Titulo = tituloBase;
+            return;
+        }
+        Titulo = txt.Length > 0 ? tituloBase + "  —  " + txt : tituloBase;
+    }
+
     void LigaContagem()
     {
         if (cfg.Tempo <= 0 || cfg.Padrao == null) return;
@@ -275,9 +347,9 @@ class Escolha : JanelaFiraw
                 Aceita(cfg.Padrao, false);
                 return;
             }
-            lblConta.Text = Idioma.T("esc.auto", restante);
+            MostraContagem(Idioma.T("esc.auto", restante));
         };
-        lblConta.Text = Idioma.T("esc.auto", restante);
+        MostraContagem(Idioma.T("esc.auto", restante));
         relogio.Start();
     }
 
@@ -294,7 +366,9 @@ class Escolha : JanelaFiraw
         {
             relogio.Stop();
             relogio = null;
+            restante = 0;
             if (lblConta != null && lblConta.ForeColor != C.Bom) lblConta.Text = "";
+            if (tituloBase != null) Titulo = tituloBase;
         }
     }
 
@@ -386,6 +460,8 @@ static class Programa
         List<string> enderecos = new List<string>();
         bool registrar = false, remover = false, config = false;
         bool pegarEdge = false, soltarEdge = false, silencioso = false;
+        // null = segue o config; true/false = manda nesta chamada so.
+        bool? enxutoAgora = null;
 
         foreach (string a in args)
         {
@@ -399,6 +475,10 @@ static class Programa
                 case "--capture-edge": pegarEdge = true; break;
                 case "--release-edge": soltarEdge = true; break;
                 case "--silent": silencioso = true; break;
+                case "--slim":
+                case "--enxuto": enxutoAgora = true; break;
+                case "--full":
+                case "--completo": enxutoAgora = false; break;
                 default:
                     if (!a.StartsWith("-")) enderecos.Add(a);
                     break;
@@ -424,6 +504,9 @@ static class Programa
         if (soltarEdge) { Registrar.DefineCapturaEdge(false, null); return 0; }
 
         Cfg cfg = Cfg.Carregar();
+
+        // Sem gravar: um atalho pode forcar o modo cheio sem mudar a preferencia.
+        if (enxutoAgora.HasValue) cfg.Compacto = enxutoAgora.Value;
 
         // Sem endereco na linha de comando: quem chamou foi o menu Iniciar.
         // O util nesse caso e abrir o configurador, nao uma janela vazia.

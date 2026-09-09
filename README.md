@@ -28,6 +28,7 @@ O Windows só aceita **um** navegador padrão. Mas o dia a dia não é assim:
 | **Regras por expressão** | Regex ECMAScript no endereço inteiro, quando o curinga não basta |
 | **Janela de escolha** | Ícone real de cada navegador, atalho `1`-`9`, `Enter` para o padrão, `Esc` cancela |
 | **Modo enxuto** | Só ícone (grande), nome e número — sem endereço, sem caixas, sem botões |
+| **Recolhida** | No modo enxuto, nasce do tamanho de **uma linha** e abre quando o mouse chega |
 | **Ícone por navegador** | Troque por um `.ico`, ou pelo ícone nº _n_ de dentro de um `.exe`/`.dll` |
 | **Ordem da lista** | Subir/Descer: quem está em primeiro é o `1` na janela de escolha |
 | **Importar / exportar** | Leva a configuração inteira para outra máquina em um `.ini` |
@@ -89,7 +90,12 @@ FirawSelector.exe --unregister       tira o registro
 FirawSelector.exe --capture-edge     assume o protocolo microsoft-edge:
 FirawSelector.exe --release-edge     devolve o protocolo
 FirawSelector.exe --settings         abre o Studio
+FirawSelector.exe --slim <url>       força o modo enxuto só nesta chamada
+FirawSelector.exe --completo <url>   força o modo cheio só nesta chamada
 ```
+
+`--slim` e `--completo` não gravam nada: servem para um atalho que precisa do
+outro modo sem mexer na sua preferência.
 
 Vários endereços de uma vez: o primeiro pergunta, os outros seguem a mesma escolha.
 

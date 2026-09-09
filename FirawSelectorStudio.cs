@@ -926,8 +926,22 @@ class Studio : JanelaFiraw
         y += 26;
 
         CheckBox cCompacto = UI.Caixa(Idioma.T("op.compacto"), 4, y, cfg.Compacto);
-        cCompacto.CheckedChanged += delegate { cfg.Compacto = cCompacto.Checked; Guarda(); };
         p.Controls.Add(cCompacto);
+        y += 26;
+
+        // Recuada e presa ao modo enxuto: recolher so existe la dentro.
+        CheckBox cRecolhido = UI.Caixa(Idioma.T("op.recolhido"), 28, y, cfg.Recolhido);
+        cRecolhido.Enabled = cfg.Compacto;
+        cRecolhido.CheckedChanged += delegate { cfg.Recolhido = cRecolhido.Checked; Guarda(); };
+        p.Controls.Add(cRecolhido);
+
+        cCompacto.CheckedChanged += delegate
+        {
+            cfg.Compacto = cCompacto.Checked;
+            cRecolhido.Enabled = cCompacto.Checked;
+            cRecolhido.Invalidate();
+            Guarda();
+        };
         y += 40;
 
         // ---- idioma e tema ----
