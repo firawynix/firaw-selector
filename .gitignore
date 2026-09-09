@@ -1,0 +1,11 @@
+# saidas de compilacao
+*.exe
+*.pdb
+dist/
+
+# icone gerado pelo tools/mkico.cs na primeira compilacao
+firawselector.ico
+
+# config de teste que o proprio programa escreve ao lado do .exe (modo portatil)
+config.ini
+firawselector.log
