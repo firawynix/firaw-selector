@@ -382,6 +382,7 @@ class Studio : JanelaFiraw
     readonly Dictionary<string, Panel> paginas = new Dictionary<string, Panel>();
 
     ListBox lstNav, lstRegras;
+    Panel faixa;
     Label lblContaNav, lblResultado, lblEstadoWin;
     TextBox txtTeste, txtLog;
     string abaInicial;
@@ -411,6 +412,7 @@ class Studio : JanelaFiraw
 
         Corpo.Controls.Add(conteudo);
         Corpo.Controls.Add(lateral);
+        Corpo.Controls.Add(FaixaPadrao());   // por ultimo: e o primeiro a encostar no topo
 
         paginas["navegadores"] = PaginaNavegadores();
         paginas["regras"] = PaginaRegras();
@@ -450,6 +452,47 @@ class Studio : JanelaFiraw
 
         Mostra(abaInicial);
         FormClosing += delegate { Guarda(); };
+    }
+
+    /// <summary>
+    /// Faixa de aviso no topo enquanto o FirawSelector nao for o padrao — sem
+    /// isso a pessoa instala, fecha e nunca descobre por que os links continuam
+    /// abrindo no navegador de antes. Some sozinha quando vira padrao.
+    /// </summary>
+    Panel FaixaPadrao()
+    {
+        Panel f = new Panel();
+        f.Dock = DockStyle.Top;
+        f.Height = 46;
+        f.BackColor = C.Painel;
+        f.Visible = !Registrar.EhPadrao();
+        faixa = f;
+
+        f.Paint += delegate(object s, PaintEventArgs e)
+        {
+            using (Brush b = new SolidBrush(C.Aviso))
+                e.Graphics.FillRectangle(b, 0, 0, 3, f.Height);
+            using (Pen p = new Pen(C.Linha))
+                e.Graphics.DrawLine(p, 0, f.Height - 1, f.Width, f.Height - 1);
+        };
+
+        Label texto = UI.Rotulo(Idioma.T("faixa.naoPadrao"), 18, 14);
+        texto.ForeColor = C.Aviso;
+        f.Controls.Add(texto);
+
+        Button b2 = UI.Botao(Idioma.T("faixa.tornarPadrao"), 0, 8, 160, delegate
+        {
+            Registrar.Registra(ExeDoMotor());
+            Registrar.AbrePadroesWindows();
+        }, true);
+        f.Controls.Add(b2);
+        // Ancora nao serve aqui: ela guarda a distancia da borda MEDIDA quando o
+        // painel ainda tem o tamanho de fabrica, e o botao vai parar fora da
+        // tela quando a faixa cresce. Reposicionar no Resize e exato.
+        f.Resize += delegate { b2.Left = Math.Max(8, f.Width - b2.Width - 18); };
+        b2.Left = Math.Max(8, f.Width - b2.Width - 18);
+
+        return f;
     }
 
     void Mostra(string chave)
@@ -501,9 +544,11 @@ class Studio : JanelaFiraw
             UI.Botao(Idioma.T("btn.editar"), x, y + 116, 200, delegate { EditaNavegador(); }, false),
             UI.Botao(Idioma.T("nav.manual"), x, y + 152, 200, delegate { NovoNavegador(); }, false),
             UI.Botao(Idioma.T("btn.remover"), x, y + 188, 200, delegate { RemoveNavegador(); }, false),
-            UI.Botao(Idioma.T("nav.reprocurar"), x, y + 232, 200, delegate { Reprocura(false); }, false),
-            UI.Botao(Idioma.T("nav.perfis"), x, y + 268, 200, delegate { Reprocura(true); }, false),
-            UI.Botao(Idioma.T("nav.abrirTeste"), x, y + 312, 200, delegate { TestaNavegador(); }, false)
+            UI.Botao(Idioma.T("btn.subir"), x, y + 232, 96, delegate { MoveNavegador(-1); }, false),
+            UI.Botao(Idioma.T("btn.descer"), x + 104, y + 232, 96, delegate { MoveNavegador(1); }, false),
+            UI.Botao(Idioma.T("nav.reprocurar"), x, y + 276, 200, delegate { Reprocura(false); }, false),
+            UI.Botao(Idioma.T("nav.perfis"), x, y + 312, 200, delegate { Reprocura(true); }, false),
+            UI.Botao(Idioma.T("nav.abrirTeste"), x, y + 356, 200, delegate { TestaNavegador(); }, false)
         };
         foreach (Button b in bs) direita.Controls.Add(b);
 
@@ -610,6 +655,26 @@ class Studio : JanelaFiraw
         if (cfg.SegundoId == n.Id) cfg.SegundoId = "";
         Guarda();
         RecarregaNavegadores();
+    }
+
+    /// <summary>
+    /// A ordem da lista e a ordem dos numeros 1-9 na janela de escolha. Por isso
+    /// ela precisa ser arrastavel: o navegador do dia a dia tem de ser o 1.
+    /// </summary>
+    void MoveNavegador(int passo)
+    {
+        Navegador n = NavSelecionado();
+        if (n == null) return;
+
+        int i = cfg.Navegadores.IndexOf(n);
+        int j = i + passo;
+        if (i < 0 || j < 0 || j >= cfg.Navegadores.Count) return;
+
+        cfg.Navegadores[i] = cfg.Navegadores[j];
+        cfg.Navegadores[j] = n;
+        Guarda();
+        RecarregaNavegadores();
+        lstNav.SelectedIndex = j;
     }
 
     void Reprocura(bool comPerfis)
@@ -858,6 +923,11 @@ class Studio : JanelaFiraw
         CheckBox cLog = UI.Caixa(Idioma.T("op.log"), 4, y, cfg.Log);
         cLog.CheckedChanged += delegate { cfg.Log = cLog.Checked; Guarda(); };
         p.Controls.Add(cLog);
+        y += 26;
+
+        CheckBox cCompacto = UI.Caixa(Idioma.T("op.compacto"), 4, y, cfg.Compacto);
+        cCompacto.CheckedChanged += delegate { cfg.Compacto = cCompacto.Checked; Guarda(); };
+        p.Controls.Add(cCompacto);
         y += 40;
 
         // ---- idioma e tema ----
@@ -929,6 +999,10 @@ class Studio : JanelaFiraw
         p.Controls.Add(cEdge);
         y += 34;
 
+        p.Controls.Add(UI.Botao(Idioma.T("op.exportar"), 4, y, 220, Exporta, false));
+        p.Controls.Add(UI.Botao(Idioma.T("op.importar"), 232, y, 220, Importa, false));
+        y += 40;
+
         Label ondeCfg = UI.Rotulo(Idioma.T("sobre.config") + ": " + Amb.CaminhoIni(), 4, y);
         ondeCfg.ForeColor = C.Texto3;
         ondeCfg.Font = new Font("Consolas", 8f);
@@ -943,6 +1017,51 @@ class Studio : JanelaFiraw
         return Path.Combine(Amb.PastaExe, Amb.Produto + ".exe");
     }
 
+    void Exporta(object s, EventArgs e)
+    {
+        using (SaveFileDialog d = new SaveFileDialog())
+        {
+            d.Filter = Idioma.T("op.iniFiltro");
+            d.FileName = "firawselector-config.ini";
+            if (d.ShowDialog(this) != DialogResult.OK) return;
+            try
+            {
+                cfg.SalvarEm(d.FileName);
+                UI.Informa(this, Idioma.T("op.exportado", d.FileName));
+            }
+            catch (Exception ex) { UI.Aviso(this, ex.Message); }
+        }
+    }
+
+    void Importa(object s, EventArgs e)
+    {
+        using (OpenFileDialog d = new OpenFileDialog())
+        {
+            d.Filter = Idioma.T("op.iniFiltro");
+            if (d.ShowDialog(this) != DialogResult.OK) return;
+            if (!UI.Confirma(this, Idioma.T("op.importarAviso"))) return;
+
+            try
+            {
+                // Le primeiro, grava depois: arquivo torto nao pode deixar a
+                // configuracao pela metade.
+                Cfg novo = Cfg.LerArquivo(d.FileName);
+                if (novo.Navegadores.Count == 0)
+                    throw new Exception(Idioma.T("nav.perfisNenhum"));
+
+                novo.Salvar();
+                cfg = novo;
+                UI.Informa(this, Idioma.T("op.importado"));
+                Reabrir = true;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                UI.Aviso(this, Idioma.T("op.importarRuim", ex.Message));
+            }
+        }
+    }
+
     void AtualizaEstadoWindows()
     {
         bool reg = Registrar.EstaRegistrado();
@@ -951,6 +1070,7 @@ class Studio : JanelaFiraw
             (reg ? Idioma.T("op.registrado") : Idioma.T("op.naoRegistrado")) + "  ·  " +
             (pad ? Idioma.T("op.ehPadrao") : Idioma.T("op.naoEhPadrao"));
         lblEstadoWin.ForeColor = pad ? C.Bom : (reg ? C.Aviso : C.Texto2);
+        if (faixa != null) faixa.Visible = !pad;
     }
 
     // ================= registro =================

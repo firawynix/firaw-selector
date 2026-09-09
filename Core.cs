@@ -17,7 +17,7 @@ static class Amb
 {
     public const string Produto = "FirawSelector";
     public const string Marca = "Firawynix";
-    public const string Versao = "1.0.0";
+    public const string Versao = "1.0.1";
     public const string Site = "https://firawselector.firawynix.com.br";
     public const string Repo = "https://github.com/firawynix/firaw-selector";
 
@@ -475,6 +475,24 @@ static class Idioma
           "Registered. Now pick FirawSelector in Settings > Apps > Default apps.");
         A("op.desregistrado", "Registro removido.", "Registration removed.");
         A("op.esquecido", "Lembrados apagados.", "Remembered sites cleared.");
+        A("op.compacto", "Janela de escolha enxuta: só ícone, nome e número",
+                         "Slim picker: icon, name and number only");
+        A("op.exportar", "Exportar configuração", "Export configuration");
+        A("op.importar", "Importar configuração", "Import configuration");
+        A("op.iniFiltro", "Configuração do FirawSelector (*.ini)|*.ini|Todos os arquivos|*.*",
+                          "FirawSelector configuration (*.ini)|*.ini|All files|*.*");
+        A("op.exportado", "Configuração salva em {0}", "Configuration saved to {0}");
+        A("op.importado", "Configuração importada.", "Configuration imported.");
+        A("op.importarAviso",
+          "Importar substitui os navegadores, as regras e as opções que estão aqui agora. Continuar?",
+          "Importing replaces the browsers, rules and options you have now. Continue?");
+        A("op.importarRuim", "Não consegui ler esse arquivo: {0}",
+                             "Could not read that file: {0}");
+
+        // -------- faixa de aviso --------
+        A("faixa.naoPadrao", "O FirawSelector não é o navegador padrão do Windows.",
+                             "FirawSelector is not the default Windows browser.");
+        A("faixa.tornarPadrao", "Tornar padrão", "Make default");
 
         // -------- registro --------
         A("lg.titulo", "Últimos links que passaram por aqui", "Last links that came through");

@@ -27,6 +27,10 @@ O Windows só aceita **um** navegador padrão. Mas o dia a dia não é assim:
 | **Regras por endereço** | `https://*/docs/*` com curingas `*` e `?` |
 | **Regras por expressão** | Regex ECMAScript no endereço inteiro, quando o curinga não basta |
 | **Janela de escolha** | Ícone real de cada navegador, atalho `1`-`9`, `Enter` para o padrão, `Esc` cancela |
+| **Modo enxuto** | Só ícone (grande), nome e número — sem endereço, sem caixas, sem botões |
+| **Ícone por navegador** | Troque por um `.ico`, ou pelo ícone nº _n_ de dentro de um `.exe`/`.dll` |
+| **Ordem da lista** | Subir/Descer: quem está em primeiro é o `1` na janela de escolha |
+| **Importar / exportar** | Leva a configuração inteira para outra máquina em um `.ini` |
 | **Perfis** | Chrome, Edge, Brave e Vivaldi (`--profile-directory`) e Firefox (`-P`) viram entradas próprias |
 | **Janela privativa** | Por regra, por marcação na hora, ou segurando `Ctrl` no clique |
 | **Lembrar por site** | "Sempre usar este navegador para `dominio.com`" — e dá para esquecer tudo depois |

@@ -517,6 +517,8 @@ class Cfg
     public bool LimparRastreio = false;
     public bool ExpandirCurtas = false;
     public bool Log = false;
+    /// <summary>Janela de escolha so com icone, nome e numero.</summary>
+    public bool Compacto = false;
 
     public List<Navegador> Navegadores = new List<Navegador>();
     public List<Regra> Regras = new List<Regra>();
@@ -578,11 +580,31 @@ class Cfg
 
     public static Cfg Carregar()
     {
-        Cfg c = new Cfg();
         string arq = Amb.CaminhoIni();
-        Dictionary<string, List<string>> s = Ini.Ler(arq);
-
         bool novo = !File.Exists(arq);
+
+        Cfg c = LerArquivo(arq);
+
+        if (novo || c.Navegadores.Count == 0)
+        {
+            c.Semear();
+            if (novo) c.Salvar();
+        }
+
+        Idioma.Definir(c.Lingua);
+        Cores.Aplicar(c.Tema);
+        return c;
+    }
+
+    /// <summary>
+    /// Le um INI e devolve a configuracao, sem mexer em idioma, tema nem
+    /// procurar navegador. E o que a importacao precisa: ler o arquivo do
+    /// usuario sem que ele vire o config em uso no meio do caminho.
+    /// </summary>
+    public static Cfg LerArquivo(string arq)
+    {
+        Cfg c = new Cfg();
+        Dictionary<string, List<string>> s = Ini.Ler(arq);
         List<string> g = s.ContainsKey("geral") ? s["geral"] : null;
 
         c.Lingua = Ini.Valor(g, "idioma", "auto");
@@ -596,6 +618,7 @@ class Cfg
         c.LimparRastreio = Ini.Bool(g, "limparRastreio", false);
         c.ExpandirCurtas = Ini.Bool(g, "expandirCurtas", false);
         c.Log = Ini.Bool(g, "log", false);
+        c.Compacto = Ini.Bool(g, "compacto", false);
 
         if (s.ContainsKey("navegadores"))
         {
@@ -630,23 +653,23 @@ class Cfg
             }
         }
 
-        if (novo || c.Navegadores.Count == 0)
-        {
-            c.Semear();
-            if (novo) c.Salvar();
-        }
-
-        Idioma.Definir(c.Lingua);
-        Cores.Aplicar(c.Tema);
         return c;
     }
 
     public void Salvar()
     {
-        string arq = Amb.CaminhoIni();
+        SalvarEm(Amb.CaminhoIni());
+    }
+
+    public void SalvarEm(string arq)
+    {
         try { Directory.CreateDirectory(Path.GetDirectoryName(arq)); }
         catch { }
+        File.WriteAllText(arq, ParaTexto(), new UTF8Encoding(false));
+    }
 
+    public string ParaTexto()
+    {
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("; " + Amb.Produto + " " + Amb.Versao + " - " + Amb.Site);
         sb.AppendLine("; Editavel a mao. O Studio reescreve este arquivo ao salvar.");
@@ -663,6 +686,7 @@ class Cfg
         sb.AppendLine("limparRastreio=" + (LimparRastreio ? "1" : "0"));
         sb.AppendLine("expandirCurtas=" + (ExpandirCurtas ? "1" : "0"));
         sb.AppendLine("log=" + (Log ? "1" : "0"));
+        sb.AppendLine("compacto=" + (Compacto ? "1" : "0"));
 
         sb.AppendLine();
         sb.AppendLine("[navegadores]");
@@ -679,7 +703,7 @@ class Cfg
         foreach (KeyValuePair<string, string> kv in Lembrados)
             sb.AppendLine(kv.Key + "=" + kv.Value);
 
-        File.WriteAllText(arq, sb.ToString(), new UTF8Encoding(false));
+        return sb.ToString();
     }
 }
 

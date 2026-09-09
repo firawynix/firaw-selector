@@ -13,18 +13,20 @@ class ItemNavegador : Panel
     public readonly Navegador Nav;
     readonly int numero;
     readonly bool ehPadrao;
+    readonly bool compacto;
     bool dentro;
 
     Cores C { get { return Cores.Atual; } }
 
-    public ItemNavegador(Navegador n, int numeroAtalho, bool padrao)
+    public ItemNavegador(Navegador n, int numeroAtalho, bool padrao, bool enxuto)
     {
         Nav = n;
         numero = numeroAtalho;
         ehPadrao = padrao;
+        compacto = enxuto;
 
         DoubleBuffered = true;
-        Height = 52;
+        Height = compacto ? 64 : 52;
         Cursor = Cursors.Hand;
         BackColor = C.Painel;
 
@@ -49,14 +51,28 @@ class ItemNavegador : Panel
                 g.FillRectangle(b, 0, 1, 3, Height - 2);
         }
 
-        Icon ic = Nav.Icone(32);
-        if (ic != null) g.DrawIcon(ic, new Rectangle(15, (Height - 24) / 2, 24, 24));
+        // No modo enxuto o icone e a informacao principal: sai a 40, no lugar
+        // dos 24 do modo normal, e a linha inteira gira em torno dele.
+        int lado = compacto ? 40 : 24;
+        Icon ic = Nav.Icone(compacto ? 48 : 32);
+        if (ic != null) g.DrawIcon(ic, new Rectangle(compacto ? 18 : 15, (Height - lado) / 2, lado, lado));
 
+        int textoX = compacto ? 74 : 52;
         using (Brush tinta = new SolidBrush(C.Texto))
-        using (Font f = new Font("Segoe UI Semibold", 10f, FontStyle.Bold))
-            g.DrawString(Nav.Nome, f, tinta, 52, Nav.Args.Length > 0 ? 8 : 16);
+        using (Font f = new Font("Segoe UI Semibold", compacto ? 12f : 10f, FontStyle.Bold))
+        using (StringFormat sf = new StringFormat())
+        {
+            sf.LineAlignment = StringAlignment.Center;
+            sf.Trimming = StringTrimming.EllipsisCharacter;
+            sf.FormatFlags = StringFormatFlags.NoWrap;
+            Rectangle r = compacto
+                ? new Rectangle(textoX, 0, Width - textoX - 54, Height)
+                : new Rectangle(textoX, Nav.Args.Length > 0 ? 4 : 0,
+                    Width - textoX - 46, Nav.Args.Length > 0 ? 24 : Height);
+            g.DrawString(Nav.Nome, f, tinta, r, sf);
+        }
 
-        if (Nav.Args.Length > 0)
+        if (!compacto && Nav.Args.Length > 0)
         {
             using (Brush tinta = new SolidBrush(C.Texto3))
             using (Font f = new Font("Segoe UI", 7.8f))
@@ -71,13 +87,14 @@ class ItemNavegador : Panel
 
         if (numero <= 9)
         {
-            Rectangle cx = new Rectangle(Width - 40, (Height - 22) / 2, 22, 22);
+            int c = compacto ? 28 : 22;
+            Rectangle cx = new Rectangle(Width - c - 18, (Height - c) / 2, c, c);
             using (Brush b = new SolidBrush(C.Campo))
                 g.FillRectangle(b, cx);
             using (Pen p = new Pen(C.Linha))
                 g.DrawRectangle(p, cx);
             using (Brush tinta = new SolidBrush(C.Texto2))
-            using (Font f = new Font("Consolas", 9f))
+            using (Font f = new Font("Consolas", compacto ? 11f : 9f))
             using (StringFormat sf = new StringFormat())
             {
                 sf.Alignment = StringAlignment.Center;
@@ -128,26 +145,33 @@ class Escolha : JanelaFiraw
     void Monta()
     {
         List<Navegador> lista = cfg.Visiveis();
-        int largura = 520;
-        int y = 14;
+        bool enxuto = cfg.Compacto;
+        int largura = enxuto ? 400 : 520;
+        int y = enxuto ? 12 : 14;
 
-        lblUrl = new Label();
-        lblUrl.Location = new Point(16, y);
-        lblUrl.Size = new Size(largura - 32, 20);
-        lblUrl.ForeColor = C.AcentoTexto;
-        lblUrl.Font = new Font("Segoe UI Semibold", 10f, FontStyle.Bold);
-        lblUrl.Text = string.IsNullOrEmpty(host) ? url : host;
-        Corpo.Controls.Add(lblUrl);
-        y += 21;
+        // No modo enxuto so ficam icone, nome e numero. O endereco, as caixas e
+        // os botoes saem — o teclado continua fazendo tudo (1-9, Enter, Esc,
+        // Ctrl para privativo).
+        if (!enxuto)
+        {
+            lblUrl = new Label();
+            lblUrl.Location = new Point(16, y);
+            lblUrl.Size = new Size(largura - 32, 20);
+            lblUrl.ForeColor = C.AcentoTexto;
+            lblUrl.Font = new Font("Segoe UI Semibold", 10f, FontStyle.Bold);
+            lblUrl.Text = string.IsNullOrEmpty(host) ? url : host;
+            Corpo.Controls.Add(lblUrl);
+            y += 21;
 
-        Label caminho = new Label();
-        caminho.Location = new Point(16, y);
-        caminho.Size = new Size(largura - 32, 17);
-        caminho.ForeColor = C.Texto3;
-        caminho.Font = new Font("Consolas", 8.25f);
-        caminho.Text = Encurta(url, 92);
-        Corpo.Controls.Add(caminho);
-        y += 26;
+            Label caminho = new Label();
+            caminho.Location = new Point(16, y);
+            caminho.Size = new Size(largura - 32, 17);
+            caminho.ForeColor = C.Texto3;
+            caminho.Font = new Font("Consolas", 8.25f);
+            caminho.Text = Encurta(url, 92);
+            Corpo.Controls.Add(caminho);
+            y += 26;
+        }
 
         if (lista.Count == 0)
         {
@@ -164,17 +188,29 @@ class Escolha : JanelaFiraw
         for (int i = 0; i < lista.Count; i++)
         {
             Navegador n = lista[i];
-            ItemNavegador item = new ItemNavegador(n, i + 1, padrao != null && n.Id == padrao.Id);
+            ItemNavegador item = new ItemNavegador(n, i + 1, padrao != null && n.Id == padrao.Id, enxuto);
             item.Location = new Point(16, y);
             item.Width = largura - 32;
             item.Click += delegate(object s, EventArgs e)
             {
                 Aceita(((ItemNavegador)s).Nav, Control.ModifierKeys == Keys.Control);
             };
-            // O clique no icone e no texto tem de valer tambem: sao filhos do painel.
-            foreach (Control filho in item.Controls) filho.Click += item_Click;
             Corpo.Controls.Add(item);
-            y += 56;
+            y += item.Height + 4;
+        }
+
+        if (enxuto)
+        {
+            lblConta = new Label();
+            lblConta.Location = new Point(16, y + 2);
+            lblConta.Size = new Size(largura - 32, 18);
+            lblConta.ForeColor = C.Texto3;
+            lblConta.TextAlign = ContentAlignment.MiddleCenter;
+            Corpo.Controls.Add(lblConta);
+
+            ClientSize = new Size(largura, Barra.Height + y + (cfg.Tempo > 0 ? 24 : 8));
+            LigaContagem();
+            return;
         }
 
         y += 4;
@@ -220,33 +256,29 @@ class Escolha : JanelaFiraw
         y += 26;
 
         ClientSize = new Size(largura, Barra.Height + y);
-
-        if (cfg.Tempo > 0 && cfg.Padrao != null)
-        {
-            restante = cfg.Tempo;
-            relogio = new Timer();
-            relogio.Interval = 1000;
-            relogio.Tick += delegate
-            {
-                restante--;
-                if (restante <= 0)
-                {
-                    ParaContagem();
-                    Aceita(cfg.Padrao, false);
-                    return;
-                }
-                lblConta.Text = Idioma.T("esc.auto", restante);
-            };
-            lblConta.Text = Idioma.T("esc.auto", restante);
-            relogio.Start();
-        }
+        LigaContagem();
     }
 
-    void item_Click(object s, EventArgs e)
+    void LigaContagem()
     {
-        Control filho = (Control)s;
-        ItemNavegador pai = filho.Parent as ItemNavegador;
-        if (pai != null) Aceita(pai.Nav, Control.ModifierKeys == Keys.Control);
+        if (cfg.Tempo <= 0 || cfg.Padrao == null) return;
+
+        restante = cfg.Tempo;
+        relogio = new Timer();
+        relogio.Interval = 1000;
+        relogio.Tick += delegate
+        {
+            restante--;
+            if (restante <= 0)
+            {
+                ParaContagem();
+                Aceita(cfg.Padrao, false);
+                return;
+            }
+            lblConta.Text = Idioma.T("esc.auto", restante);
+        };
+        lblConta.Text = Idioma.T("esc.auto", restante);
+        relogio.Start();
     }
 
     static string Encurta(string s, int max)
@@ -274,7 +306,7 @@ class Escolha : JanelaFiraw
             if (d.ShowDialog(this) == DialogResult.OK && d.Texto.Trim().Length > 0)
             {
                 url = d.Texto.Trim();
-                lblUrl.Text = Motor.Host(url);
+                if (lblUrl != null) lblUrl.Text = Motor.Host(url);
             }
         }
     }
@@ -284,8 +316,9 @@ class Escolha : JanelaFiraw
         if (n == null) return;
         ParaContagem();
         Resultado = n;
-        Privativo = chkPrivado.Checked || ctrl;
-        Lembrar = chkLembrar.Checked && chkLembrar.Enabled;
+        // No modo enxuto as caixas nem existem; o Ctrl continua valendo.
+        Privativo = ctrl || (chkPrivado != null && chkPrivado.Checked);
+        Lembrar = chkLembrar != null && chkLembrar.Checked && chkLembrar.Enabled;
         Close();
     }
 
