@@ -271,7 +271,9 @@ class DialogoRegra : JanelaFiraw
     CheckBox chkPriv, chkAtiva;
     public Regra Reg;
 
-    static readonly string[] Tipos = new string[] { "host", "url", "regex" };
+    // "contem" vem primeiro de proposito: e o que se quer em quase toda regra,
+    // e ser o primeiro faz dele o padrao de uma regra nova.
+    static readonly string[] Tipos = new string[] { "contem", "host", "url", "regex" };
 
     public DialogoRegra(Cfg c, Regra existente)
         : base(existente == null ? Idioma.T("reg.nova") : existente.Padrao, false, false)
@@ -301,7 +303,8 @@ class DialogoRegra : JanelaFiraw
 
         cmbTipo = UI.Combo(16, y, 170);
         cmbTipo.Items.AddRange(new object[] {
-            Idioma.T("reg.tipo.host"), Idioma.T("reg.tipo.url"), Idioma.T("reg.tipo.regex") });
+            Idioma.T("reg.tipo.contem"), Idioma.T("reg.tipo.host"),
+            Idioma.T("reg.tipo.url"), Idioma.T("reg.tipo.regex") });
         cmbTipo.SelectedIndex = 0;
         Corpo.Controls.Add(cmbTipo);
 
@@ -452,6 +455,15 @@ class Studio : JanelaFiraw
 
         Mostra(abaInicial);
         FormClosing += delegate { Guarda(); };
+
+        // Avisa o que a leitura consertou — mudanca silenciosa em regra que a
+        // pessoa escreveu seria pior do que a regra quebrada.
+        if (cfg.RegrasMigradas > 0)
+        {
+            int quantas = cfg.RegrasMigradas;
+            cfg.RegrasMigradas = 0;
+            Shown += delegate { UI.Informa(this, Idioma.T("reg.migradas", quantas)); };
+        }
     }
 
     /// <summary>
@@ -763,6 +775,7 @@ class Studio : JanelaFiraw
 
     string TextoTipo(string tipo)
     {
+        if (tipo == "contem") return Idioma.T("reg.tipo.contem");
         if (tipo == "url") return Idioma.T("reg.tipo.url");
         if (tipo == "regex") return Idioma.T("reg.tipo.regex");
         return Idioma.T("reg.tipo.host");

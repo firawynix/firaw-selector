@@ -17,7 +17,7 @@ static class Amb
 {
     public const string Produto = "FirawSelector";
     public const string Marca = "Firawynix";
-    public const string Versao = "1.0.3";
+    public const string Versao = "1.0.4";
     public const string Site = "https://firawselector.firawynix.com.br";
     public const string Repo = "https://github.com/firawynix/firaw-selector";
 
@@ -426,16 +426,20 @@ static class Idioma
         A("reg.navegador", "Navegador", "Browser");
         A("reg.privativo", "Privativo", "Private");
         A("reg.ativa", "Ativa", "Active");
+        A("reg.tipo.contem", "contém", "contains");
         A("reg.tipo.host", "domínio", "domain");
-        A("reg.tipo.url", "endereço", "address");
+        A("reg.tipo.url", "endereço inteiro", "whole address");
         A("reg.tipo.regex", "expressão", "regex");
         A("reg.nova", "Nova regra", "New rule");
         A("reg.testar", "Testar um endereço:", "Test an address:");
         A("reg.resultado", "{0}  —  {1}", "{0}  —  {1}");
         A("reg.semCasar", "nenhuma regra casou", "no rule matched");
         A("reg.ajuda",
-          "domínio: intranet.local, *.google.com   ·   endereço: https://*/docs/*   ·   expressão: regex ECMAScript no endereço inteiro",
-          "domain: intranet.local, *.google.com   ·   address: https://*/docs/*   ·   regex: ECMAScript over the whole address");
+          "contém: um pedaço do link, e vale tudo que vier depois   ·   domínio: intranet.local, *.google.com   ·   endereço inteiro: casa do começo ao fim, use * onde variar   ·   expressão: regex ECMAScript",
+          "contains: a piece of the link, and anything after it counts   ·   domain: intranet.local, *.google.com   ·   whole address: matches end to end, use * where it varies   ·   regex: ECMAScript");
+        A("reg.migradas",
+          "{0} regra(s) de \"endereço inteiro\" sem curinga viraram \"contém\": do jeito antigo elas só casavam com aquele link exato, nunca com o que vinha depois dele.",
+          "{0} \"whole address\" rule(s) with no wildcard became \"contains\": the old way they only matched that exact link, never anything after it.");
         A("reg.vazia", "Escreva o padrão da regra.", "Type the rule pattern.");
         A("reg.semNavegador", "Escolha o navegador da regra.", "Pick the rule browser.");
         A("reg.regexRuim", "Expressão inválida: {0}", "Invalid regex: {0}");

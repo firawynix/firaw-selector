@@ -23,8 +23,9 @@ O Windows só aceita **um** navegador padrão. Mas o dia a dia não é assim:
 | Recurso | Detalhe |
 |---|---|
 | **Registro como navegador** | Entra na lista de Aplicativos padrão do Windows (`http`, `https`, `ftp`, `.htm`, `.html`, `.xhtml`) |
+| **Regras por trecho** | `contém`: cole um pedaço do link e **tudo que vier depois entra na regra** — é o tipo padrão |
 | **Regras por domínio** | `intranet.local`, `*.google.com` — a primeira que casar vence |
-| **Regras por endereço** | `https://*/docs/*` com curingas `*` e `?` |
+| **Regras por endereço inteiro** | `https://*/docs/*`: casa do começo ao fim, com curingas `*` e `?` |
 | **Regras por expressão** | Regex ECMAScript no endereço inteiro, quando o curinga não basta |
 | **Janela de escolha** | Ícone real de cada navegador, atalho `1`-`9`, `Enter` para o padrão, `Esc` cancela |
 | **Modo enxuto** | Só ícone (grande), nome e número — sem endereço, sem caixas, sem botões |
@@ -120,14 +121,17 @@ limparRastreio=1
 0001=chrome|Google Chrome|C:\...\chrome.exe|||chromium|0|0
 
 [regras]
-0001=*.suaempresa.com.br|msedge|host|0|1
-0002=https://*/admin/*|firefox|url|1|1
+0001=gitlab.suaempresa.com.br/meu-grupo|msedge|contem|0|1
+0002=*.suaempresa.com.br|msedge|host|0|1
+0003=https://*/admin/*|firefox|url|1|1
 
 [lembrados]
 github.com=firefox
 ```
 
 A numeração (`0001`, `0002`) é a ordem de avaliação: a primeira regra que casar vence.
+
+**Qual tipo usar:** na dúvida, `contem`. Ele pega o link e tudo que vier depois — `gitlab.suaempresa.com.br/meu-grupo` vale para `/meu-grupo/projeto/-/merge_requests/12`. Já `url` compara **do começo ao fim**: sem um `*` no final, ele só casaria com aquele link exato. Regra antiga de `url` sem curinga é convertida para `contem` na primeira leitura, e o Studio avisa quando faz isso.
 
 ## Compilar
 

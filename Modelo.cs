@@ -384,6 +384,18 @@ class Regra
             if (Tipo == "regex")
                 return Regex.IsMatch(url, Padrao, RegexOptions.IgnoreCase);
 
+            // "contem": um pedaco do endereco, em qualquer lugar dele. E o que
+            // quase todo mundo quer ao colar um link numa regra — o endereco
+            // inteiro casado letra por letra so serviria para aquele link, e
+            // ninguem abre duas vezes exatamente a mesma URL.
+            if (Tipo == "contem")
+            {
+                if (Padrao.IndexOf('*') < 0 && Padrao.IndexOf('?') < 0)
+                    return url.IndexOf(Padrao, StringComparison.OrdinalIgnoreCase) >= 0;
+                // Com curinga, vale em qualquer trecho — sem ancora nas pontas.
+                return Regex.IsMatch(url, CoringaSolto(Padrao), RegexOptions.IgnoreCase);
+            }
+
             string alvo = Tipo == "host" ? host : url;
             if (string.IsNullOrEmpty(alvo)) return false;
 
@@ -401,7 +413,21 @@ class Regra
 
     public static string Coringa(string padrao)
     {
-        return "^" + Regex.Escape(padrao).Replace("\\*", ".*").Replace("\\?", ".") + "$";
+        return "^" + CoringaSolto(padrao) + "$";
+    }
+
+    public static string CoringaSolto(string padrao)
+    {
+        return Regex.Escape(padrao).Replace("\\*", ".*").Replace("\\?", ".");
+    }
+
+    /// <summary>Uma regra de endereco sem curinga so casaria com aquele link exato.</summary>
+    public bool EnderecoTravado
+    {
+        get
+        {
+            return Tipo == "url" && Padrao.IndexOf('*') < 0 && Padrao.IndexOf('?') < 0;
+        }
     }
 
     public static bool RegexValida(string padrao, out string erro)
@@ -522,6 +548,9 @@ class Cfg
     /// <summary>No modo enxuto: sem moldura, so as linhas; a janela aparece no hover.</summary>
     public bool Fantasma = false;
 
+    /// <summary>Quantas regras a leitura consertou nesta carga. Nao vai para o arquivo.</summary>
+    public int RegrasMigradas;
+
     public List<Navegador> Navegadores = new List<Navegador>();
     public List<Regra> Regras = new List<Regra>();
     public Dictionary<string, string> Lembrados = new Dictionary<string, string>();
@@ -593,6 +622,14 @@ class Cfg
             if (novo) c.Salvar();
         }
 
+        // Grava o conserto na hora: senao a regra volta a nao casar no proximo
+        // programa que ler o arquivo.
+        if (c.RegrasMigradas > 0 && !novo)
+        {
+            try { c.Salvar(); }
+            catch { }
+        }
+
         Idioma.Definir(c.Lingua);
         Cores.Aplicar(c.Tema);
         return c;
@@ -642,6 +679,16 @@ class Cfg
                 if (p <= 0) continue;
                 Regra r = Regra.Le(linha.Substring(p + 1).Trim());
                 if (r != null) c.Regras.Add(r);
+            }
+
+            // Regra de endereco sem curinga so casava com aquele link exato —
+            // e ninguem escreve uma regra para abrir a MESMA URL de novo. Quem
+            // colou um link ali queria "e tudo que vier depois". Vira "contem".
+            foreach (Regra r in c.Regras)
+            {
+                if (!r.EnderecoTravado) continue;
+                r.Tipo = "contem";
+                c.RegrasMigradas++;
             }
         }
 
