@@ -959,12 +959,20 @@ static class Motor
         privado = false;
         motivo = "";
 
-        // Decidir SEMPRE pelo endereco de verdade: um link do Teams sobre o
-        // gitlab da empresa e um link do gitlab, por mais embrulhado que chegue.
-        // Abrir desembrulhado ja e outra conversa — isso e opcional.
+        // Decidir pelo endereco de verdade: um link do Teams sobre o gitlab da
+        // empresa e um link do gitlab, por mais embrulhado que chegue. Abrir
+        // desembrulhado ja e outra conversa — isso e opcional.
+        //
+        // As DUAS formas sao testadas, e nao so a de dentro: quem ja tinha
+        // regra escrita sobre o embrulho ("...atp-safelinks.html?url=...")
+        // perderia a regra se o desembrulho a escondesse.
         string real = Desembrulha(url);
+        bool embrulhado = !string.Equals(real, url, StringComparison.Ordinal);
+
         string host = Host(real);
         string alvo = ParaCasar(real);
+        string hostFora = embrulhado ? Host(url) : host;
+        string alvoFora = embrulhado ? ParaCasar(url) : alvo;
 
         if (shift && c.ForcarShift)
         {
@@ -974,7 +982,7 @@ static class Motor
 
         foreach (Regra r in c.Regras)
         {
-            if (!r.Casa(alvo, host)) continue;
+            if (!r.Casa(alvo, host) && !(embrulhado && r.Casa(alvoFora, hostFora))) continue;
             Navegador n = c.Por(r.NavegadorId);
             if (n == null || !n.Existe) continue;
             privado = r.Privado;

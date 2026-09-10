@@ -133,6 +133,8 @@ github.com=firefox
 
 A numeração (`0001`, `0002`) é a ordem de avaliação: a primeira regra que casar vence.
 
+Editando o arquivo à mão, o `|` separa os campos e por isso um `|` dentro de um valor vira `%7C`, e um `%` vira `%25`. Quem escreve pelo Studio não precisa saber disso — mas quem digita `%253A` direto no arquivo tem que escrever `%25253A`.
+
 **Link do Teams / Outlook (Safe Links).** O que chega ao clicar num link dentro do Teams não é o seu link — é uma página da Microsoft com o endereço de verdade codificado dentro (`atp-safelinks.html?url=https%3A%2F%2F…`). Nenhuma regra sobre o seu site casaria com isso. O FirawSelector **desembrulha antes de decidir**, então uma regra `contém` com `gitlab.suaempresa.com.br` pega o link direto **e** o embrulhado, com codificação simples ou dupla. Em *Opções* há a chave para também **abrir** o endereço de verdade, pulando a página de proteção — desligada por padrão, porque ligá-la tira o link da verificação da Microsoft.
 
 Só o `*` é curinga. O `?` é literal: todo endereço com consulta tem um, e tratá-lo como curinga mudaria o sentido do padrão colado.
