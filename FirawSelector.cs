@@ -593,6 +593,9 @@ static class Programa
             string url = Motor.Normaliza(bruto);
             if (url.Length == 0) continue;
 
+            // Desembrulhar ANTES de limpar: os parametros de rastreio que
+            // interessam sao os do endereco de verdade, nao os do embrulho.
+            if (cfg.AbrirReal) url = Motor.Desembrulha(url);
             if (cfg.LimparRastreio) url = Motor.LimpaRastreio(url);
             if (cfg.ExpandirCurtas) url = Motor.Expande(url);
 

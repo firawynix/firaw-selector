@@ -76,16 +76,32 @@ class DialogoNavegador : JanelaFiraw
     const int Larg = 660;
     const int Campo = 628;   // 16 a 644
 
-    TextBox txtNome, txtExe, txtArgs, txtPriv, txtIcone;
+    TextBox txtNome, txtExe, txtArgs, txtPriv, txtIcone, txtRegra;
     NumericUpDown numIcone;
     PictureBox previa;
+    ComboBox cmbTipoRegra;
+    ListBox lstRegras;
     public Navegador Nav;
 
-    public DialogoNavegador(Navegador existente)
+    readonly Cfg cfg;
+    // Nada e aplicado antes do Salvar: cancelar tem de desfazer tudo.
+    readonly List<Regra> minhas = new List<Regra>();
+    readonly List<Regra> tiradas = new List<Regra>();
+
+    static readonly string[] TiposRegra = new string[] { "contem", "host", "url", "regex" };
+
+    public DialogoNavegador(Cfg c, Navegador existente)
         : base(existente == null ? Idioma.T("nav.novo") : existente.Nome, false, false)
     {
         ShowInTaskbar = false;
+        cfg = c;
         Nav = existente;
+
+        if (existente != null)
+        {
+            foreach (Regra r in cfg.Regras)
+                if (r.NavegadorId == existente.Id) minhas.Add(r);
+        }
 
         int y = 14;
         Corpo.Controls.Add(UI.Rotulo(Idioma.T("nav.nome"), 16, y));
@@ -146,6 +162,34 @@ class DialogoNavegador : JanelaFiraw
         y += 20;
         txtPriv = UI.Campo(16, y, Campo);
         Corpo.Controls.Add(txtPriv);
+        y += 36;
+
+        // ---- regras deste navegador ----
+        // Aqui e o lugar natural de criar a regra: voce esta olhando para o
+        // navegador que quer usar. A aba Regras continua existindo porque e la
+        // que se ve a ORDEM entre todos — e a ordem decide quem vence.
+        Corpo.Controls.Add(UI.Titulo(Idioma.T("nav.regras"), 16, y));
+        y += 26;
+
+        cmbTipoRegra = UI.Combo(16, y, 150);
+        cmbTipoRegra.Items.AddRange(new object[] {
+            Idioma.T("reg.tipo.contem"), Idioma.T("reg.tipo.host"),
+            Idioma.T("reg.tipo.url"), Idioma.T("reg.tipo.regex") });
+        cmbTipoRegra.SelectedIndex = 0;
+        Corpo.Controls.Add(cmbTipoRegra);
+
+        txtRegra = UI.Campo(174, y + 1, 336);
+        txtRegra.Font = new Font("Consolas", 9f);
+        Corpo.Controls.Add(txtRegra);
+
+        Corpo.Controls.Add(UI.Botao(Idioma.T("nav.regraNova"), 518, y - 2, 126, AcrescentaRegra, false));
+        y += 34;
+
+        lstRegras = UI.Lista(16, y, Campo, 116, 24);
+        Corpo.Controls.Add(lstRegras);
+        y += 122;
+
+        Corpo.Controls.Add(UI.Botao(Idioma.T("btn.remover"), 16, y, 126, TiraRegra, false));
         y += 40;
 
         Button ok = UI.Botao(Idioma.T("btn.salvar"), 444, y, 100, Salva, true);
@@ -173,6 +217,57 @@ class DialogoNavegador : JanelaFiraw
             numIcone.Value = Math.Max(0, Math.Min(999, idx));
         }
         AtualizaPrevia();
+        RecarregaMinhas();
+    }
+
+    void RecarregaMinhas()
+    {
+        lstRegras.Items.Clear();
+        if (minhas.Count == 0)
+        {
+            lstRegras.Items.Add(Idioma.T("nav.regraVazia"));
+            return;
+        }
+        foreach (Regra r in minhas)
+        {
+            string tipo = Idioma.T("reg.tipo." + r.Tipo);
+            lstRegras.Items.Add(r.Padrao + "   ·   " + tipo + (r.Ativo ? "" : "   [ - ]"));
+        }
+    }
+
+    void AcrescentaRegra(object s, EventArgs e)
+    {
+        string padrao = txtRegra.Text.Trim();
+        if (padrao.Length == 0) { UI.Aviso(this, Idioma.T("reg.vazia")); return; }
+
+        string tipo = TiposRegra[cmbTipoRegra.SelectedIndex];
+        if (tipo == "regex")
+        {
+            string erro;
+            if (!Regra.RegexValida(padrao, out erro))
+            {
+                UI.Aviso(this, Idioma.T("reg.regexRuim", erro));
+                return;
+            }
+        }
+
+        Regra r = new Regra();
+        r.Padrao = padrao;
+        r.Tipo = tipo;
+        r.Ativo = true;
+        minhas.Add(r);
+        txtRegra.Text = "";
+        RecarregaMinhas();
+    }
+
+    void TiraRegra(object s, EventArgs e)
+    {
+        int i = lstRegras.SelectedIndex;
+        if (i < 0 || i >= minhas.Count) return;
+        // Se ja estava no config, marca para sair de la no Salvar.
+        if (cfg.Regras.Contains(minhas[i])) tiradas.Add(minhas[i]);
+        minhas.RemoveAt(i);
+        RecarregaMinhas();
     }
 
     /// <summary>Junta caminho e indice de volta no formato do config.</summary>
@@ -255,6 +350,16 @@ class DialogoNavegador : JanelaFiraw
         Nav.Familia = Navegador.FamiliaDoExe(exe);
         Nav.IconeArquivo = ValorIcone();
         Nav.EsqueceIcone();   // sem isto a lista continuaria mostrando o antigo
+
+        // Regras: so agora vao para o config, com o Id ja definido (navegador
+        // novo so ganha Id aqui em cima).
+        foreach (Regra r in tiradas) cfg.Regras.Remove(r);
+        foreach (Regra r in minhas)
+        {
+            r.NavegadorId = Nav.Id;
+            if (!cfg.Regras.Contains(r)) cfg.Regras.Add(r);
+        }
+
         DialogResult = DialogResult.OK;
         Close();
     }
@@ -635,7 +740,7 @@ class Studio : JanelaFiraw
     {
         Navegador n = NavSelecionado();
         if (n == null) return;
-        using (DialogoNavegador d = new DialogoNavegador(n))
+        using (DialogoNavegador d = new DialogoNavegador(cfg, n))
         {
             if (d.ShowDialog(this) == DialogResult.OK)
             {
@@ -647,7 +752,7 @@ class Studio : JanelaFiraw
 
     void NovoNavegador()
     {
-        using (DialogoNavegador d = new DialogoNavegador(null))
+        using (DialogoNavegador d = new DialogoNavegador(cfg, null))
         {
             if (d.ShowDialog(this) == DialogResult.OK && d.Nav != null)
             {
@@ -932,6 +1037,18 @@ class Studio : JanelaFiraw
         cExpandir.CheckedChanged += delegate { cfg.ExpandirCurtas = cExpandir.Checked; Guarda(); };
         p.Controls.Add(cExpandir);
         y += 26;
+
+        CheckBox cReal = UI.Caixa(Idioma.T("op.abrirReal"), 4, y, cfg.AbrirReal);
+        cReal.CheckedChanged += delegate { cfg.AbrirReal = cReal.Checked; Guarda(); };
+        p.Controls.Add(cReal);
+        y += 22;
+
+        Label avisoReal = UI.Rotulo(Idioma.T("op.abrirRealAviso"), 28, y);
+        avisoReal.MaximumSize = new Size(660, 34);
+        avisoReal.ForeColor = C.Texto3;
+        avisoReal.Font = new Font("Segoe UI", 8f);
+        p.Controls.Add(avisoReal);
+        y += 34;
 
         CheckBox cLog = UI.Caixa(Idioma.T("op.log"), 4, y, cfg.Log);
         cLog.CheckedChanged += delegate { cfg.Log = cLog.Checked; Guarda(); };

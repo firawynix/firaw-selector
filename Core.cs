@@ -17,7 +17,7 @@ static class Amb
 {
     public const string Produto = "FirawSelector";
     public const string Marca = "Firawynix";
-    public const string Versao = "1.0.5";
+    public const string Versao = "1.0.6";
     public const string Site = "https://firawselector.firawynix.com.br";
     public const string Repo = "https://github.com/firawynix/firaw-selector";
 
@@ -403,6 +403,10 @@ static class Idioma
         A("nav.args", "Argumentos extras", "Extra arguments");
         A("nav.argsPriv", "Argumentos de janela privativa", "Private window arguments");
         A("nav.novo", "Novo navegador", "New browser");
+        A("nav.regras", "Regras que mandam o link para este navegador",
+                        "Rules that send links to this browser");
+        A("nav.regraNova", "Acrescentar", "Add rule");
+        A("nav.regraVazia", "nenhuma ainda", "none yet");
         A("nav.icone", "Ícone — opcional (.ico, ou .exe/.dll de onde extrair)",
                        "Icon — optional (.ico, or an .exe/.dll to extract from)");
         A("nav.iconeVazio", "vazio: usa o ícone do próprio programa",
@@ -459,6 +463,12 @@ static class Idioma
                        "Strip tracking parameters (utm_*, fbclid, gclid...)");
         A("op.expandir", "Expandir links encurtados antes de decidir",
                          "Expand shortened links before deciding");
+        A("op.abrirReal",
+          "Abrir o link de verdade por trás do Safe Links (Teams/Outlook), pulando a página de proteção",
+          "Open the real link behind Safe Links (Teams/Outlook), skipping the protection page");
+        A("op.abrirRealAviso",
+          "A regra já decide pelo link de verdade mesmo com isto desligado. Ligado, o link também ABRE direto — e aí ele deixa de passar pela verificação da Microsoft.",
+          "Rules already decide by the real link even with this off. Turned on, the link also OPENS directly — and then it stops going through Microsoft's check.");
         A("op.log", "Guardar registro dos links em arquivo", "Keep a log file of the links");
         A("op.idioma", "Idioma", "Language");
         A("op.idioma.auto", "Seguir o Windows", "Follow Windows");

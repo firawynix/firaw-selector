@@ -25,7 +25,9 @@ O Windows só aceita **um** navegador padrão. Mas o dia a dia não é assim:
 | **Registro como navegador** | Entra na lista de Aplicativos padrão do Windows (`http`, `https`, `ftp`, `.htm`, `.html`, `.xhtml`) |
 | **Regras por trecho** | `contém`: cole um pedaço do link e **tudo que vier depois entra na regra** — é o tipo padrão |
 | **Regras por domínio** | `intranet.local`, `*.google.com` — a primeira que casar vence |
-| **Regras por endereço inteiro** | `https://*/docs/*`: casa do começo ao fim, com curingas `*` e `?` |
+| **Regras por endereço inteiro** | `https://*/docs/*`: casa do começo ao fim, com o curinga `*` |
+| **Safe Links** | Desembrulha o link do Teams/Outlook **antes de decidir** — a regra é sobre o seu site, não sobre a página de proteção |
+| **Regras no navegador** | Dá para criar a regra de dentro da caixa do navegador, sem ir até a aba Regras |
 | **Regras por expressão** | Regex ECMAScript no endereço inteiro, quando o curinga não basta |
 | **Janela de escolha** | Ícone real de cada navegador, atalho `1`-`9`, `Enter` para o padrão, `Esc` cancela |
 | **Modo enxuto** | Só ícone (grande), nome e número — sem endereço, sem caixas, sem botões |
@@ -130,6 +132,10 @@ github.com=firefox
 ```
 
 A numeração (`0001`, `0002`) é a ordem de avaliação: a primeira regra que casar vence.
+
+**Link do Teams / Outlook (Safe Links).** O que chega ao clicar num link dentro do Teams não é o seu link — é uma página da Microsoft com o endereço de verdade codificado dentro (`atp-safelinks.html?url=https%3A%2F%2F…`). Nenhuma regra sobre o seu site casaria com isso. O FirawSelector **desembrulha antes de decidir**, então uma regra `contém` com `gitlab.suaempresa.com.br` pega o link direto **e** o embrulhado, com codificação simples ou dupla. Em *Opções* há a chave para também **abrir** o endereço de verdade, pulando a página de proteção — desligada por padrão, porque ligá-la tira o link da verificação da Microsoft.
+
+Só o `*` é curinga. O `?` é literal: todo endereço com consulta tem um, e tratá-lo como curinga mudaria o sentido do padrão colado.
 
 A barra da raiz não atrapalha: `https://site.com` e `https://site.com/` são o mesmo lugar para as regras, então o padrão copiado da barra do navegador (que vem com a barra) casa com o link clicado (que às vezes vem sem).
 

@@ -19,6 +19,27 @@ set COMUM=Core.cs Modelo.cs Janela.cs
 
 cd /d "%~dp0"
 
+rem A versao mora em UM lugar so (Amb.Versao, no Core.cs). Este trecho a copia
+rem para os atributos do assembly — sem isso o Windows mostra 0.0.0.0 nas
+rem propriedades do arquivo e nao da para saber qual build esta instalado.
+set VER=
+for /f "tokens=2 delims==" %%v in ('findstr /c:"public const string Versao" Core.cs') do set VER=%%v
+set VER=%VER: =%
+set VER=%VER:"=%
+set VER=%VER:;=%
+if "%VER%"=="" (
+    echo Nao consegui ler a versao do Core.cs.
+    exit /b 1
+)
+> "VersaoInfo.cs" echo // Gerado por build.cmd a partir de Amb.Versao. Nao edite.
+>>"VersaoInfo.cs" echo using System.Reflection;
+>>"VersaoInfo.cs" echo [assembly: AssemblyTitle("FirawSelector")]
+>>"VersaoInfo.cs" echo [assembly: AssemblyProduct("FirawSelector")]
+>>"VersaoInfo.cs" echo [assembly: AssemblyCompany("Firawynix")]
+>>"VersaoInfo.cs" echo [assembly: AssemblyVersion("%VER%.0")]
+>>"VersaoInfo.cs" echo [assembly: AssemblyFileVersion("%VER%.0")]
+set COMUM=%COMUM% VersaoInfo.cs
+
 if not exist "firawselector.ico" (
     echo [0/4] icone...
     "%CSC%" /nologo /target:exe /codepage:65001 /r:System.dll /r:System.Drawing.dll /out:"tools\mkico.exe" "tools\mkico.cs"

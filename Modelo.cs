@@ -390,7 +390,7 @@ class Regra
             // ninguem abre duas vezes exatamente a mesma URL.
             if (Tipo == "contem")
             {
-                if (Padrao.IndexOf('*') < 0 && Padrao.IndexOf('?') < 0)
+                if (Padrao.IndexOf('*') < 0)
                     return url.IndexOf(Padrao, StringComparison.OrdinalIgnoreCase) >= 0;
                 // Com curinga, vale em qualquer trecho — sem ancora nas pontas.
                 return Regex.IsMatch(url, CoringaSolto(Padrao), RegexOptions.IgnoreCase);
@@ -416,18 +416,21 @@ class Regra
         return "^" + CoringaSolto(padrao) + "$";
     }
 
+    /// <summary>
+    /// So o "*" e curinga. O "?" NAO: todo endereco com consulta tem um, e
+    /// trata-lo como curinga fazia duas maldades caladas — mudava o sentido do
+    /// padrao colado pela pessoa e, pior, fazia o conserto automatico achar que
+    /// a regra ja tinha curinga e deixa-la travada no endereco exato.
+    /// </summary>
     public static string CoringaSolto(string padrao)
     {
-        return Regex.Escape(padrao).Replace("\\*", ".*").Replace("\\?", ".");
+        return Regex.Escape(padrao).Replace("\\*", ".*");
     }
 
     /// <summary>Uma regra de endereco sem curinga so casaria com aquele link exato.</summary>
     public bool EnderecoTravado
     {
-        get
-        {
-            return Tipo == "url" && Padrao.IndexOf('*') < 0 && Padrao.IndexOf('?') < 0;
-        }
+        get { return Tipo == "url" && Padrao.IndexOf('*') < 0; }
     }
 
     public static bool RegexValida(string padrao, out string erro)
@@ -545,6 +548,8 @@ class Cfg
     public bool Log = false;
     /// <summary>Janela de escolha so com icone, nome e numero.</summary>
     public bool Compacto = false;
+    /// <summary>Abrir o endereco de verdade em vez da pagina de protecao que o embrulha.</summary>
+    public bool AbrirReal = false;
     /// <summary>No modo enxuto: sem moldura, so as linhas; a janela aparece no hover.</summary>
     public bool Fantasma = false;
 
@@ -659,6 +664,7 @@ class Cfg
         c.Log = Ini.Bool(g, "log", false);
         c.Compacto = Ini.Bool(g, "compacto", false);
         c.Fantasma = Ini.Bool(g, "fantasma", false);
+        c.AbrirReal = Ini.Bool(g, "abrirReal", false);
 
         if (s.ContainsKey("navegadores"))
         {
@@ -738,6 +744,7 @@ class Cfg
         sb.AppendLine("log=" + (Log ? "1" : "0"));
         sb.AppendLine("compacto=" + (Compacto ? "1" : "0"));
         sb.AppendLine("fantasma=" + (Fantasma ? "1" : "0"));
+        sb.AppendLine("abrirReal=" + (AbrirReal ? "1" : "0"));
 
         sb.AppendLine();
         sb.AppendLine("[navegadores]");
@@ -803,6 +810,47 @@ static class Motor
         if (!Regex.IsMatch(s, "^[a-zA-Z][a-zA-Z0-9+.-]*:"))
             s = "http://" + s;
         return s;
+    }
+
+    /// <summary>
+    /// Tira o link de dentro do embrulho de protecao (Safe Links do Teams e do
+    /// Outlook, Proofpoint). O que chega ao clicar num link do Teams e uma
+    /// pagina da Microsoft com o endereco de verdade codificado no "url=" — e
+    /// nenhuma regra sobre o SEU site casa com isso, porque o endereco nem
+    /// aparece por inteiro ali.
+    ///
+    /// O laco repete porque esses embrulhos vem com codificacao dupla
+    /// (%253A e %3A depois de uma volta) e as vezes um dentro do outro.
+    /// </summary>
+    public static string Desembrulha(string url)
+    {
+        string atual = url;
+        for (int volta = 0; volta < 4; volta++)
+        {
+            Match m = Regex.Match(atual, "[?&](?:url|u|q)=([^&]+)", RegexOptions.IgnoreCase);
+            if (!m.Success) break;
+
+            string dentro = m.Groups[1].Value;
+            string aberto;
+            try { aberto = Uri.UnescapeDataString(dentro); }
+            catch { break; }
+
+            // So vale se o que saiu e mesmo um endereco — senao "?q=" de uma
+            // busca qualquer viraria destino.
+            if (!aberto.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+                !aberto.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                // Codificacao dupla: uma volta so ainda nao revela o "https://".
+                string outra;
+                try { outra = Uri.UnescapeDataString(aberto); }
+                catch { break; }
+                if (!outra.StartsWith("http", StringComparison.OrdinalIgnoreCase)) break;
+                aberto = outra;
+            }
+            if (aberto == atual) break;
+            atual = aberto;
+        }
+        return atual;
     }
 
     /// <summary>
@@ -910,8 +958,13 @@ static class Motor
     {
         privado = false;
         motivo = "";
-        string host = Host(url);
-        string alvo = ParaCasar(url);
+
+        // Decidir SEMPRE pelo endereco de verdade: um link do Teams sobre o
+        // gitlab da empresa e um link do gitlab, por mais embrulhado que chegue.
+        // Abrir desembrulhado ja e outra conversa — isso e opcional.
+        string real = Desembrulha(url);
+        string host = Host(real);
+        string alvo = ParaCasar(real);
 
         if (shift && c.ForcarShift)
         {
