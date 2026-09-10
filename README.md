@@ -131,6 +131,8 @@ github.com=firefox
 
 A numeração (`0001`, `0002`) é a ordem de avaliação: a primeira regra que casar vence.
 
+A barra da raiz não atrapalha: `https://site.com` e `https://site.com/` são o mesmo lugar para as regras, então o padrão copiado da barra do navegador (que vem com a barra) casa com o link clicado (que às vezes vem sem).
+
 **Qual tipo usar:** na dúvida, `contem`. Ele pega o link e tudo que vier depois — `gitlab.suaempresa.com.br/meu-grupo` vale para `/meu-grupo/projeto/-/merge_requests/12`. Já `url` compara **do começo ao fim**: sem um `*` no final, ele só casaria com aquele link exato. Regra antiga de `url` sem curinga é convertida para `contem` na primeira leitura, e o Studio avisa quando faz isso.
 
 ## Compilar

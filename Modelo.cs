@@ -805,6 +805,30 @@ static class Motor
         return s;
     }
 
+    /// <summary>
+    /// O endereco na forma que as regras comparam: com a barra da raiz sempre
+    /// explicita. "https://site.com" e "https://site.com/" sao o mesmo lugar,
+    /// mas o padrao copiado da barra do navegador vem COM a barra e o link
+    /// clicado nem sempre — e uma regra "contem" comparava letra por letra e
+    /// nao casava. Isto so muda o texto usado na comparacao; o que abre no
+    /// navegador continua sendo o endereco original.
+    /// </summary>
+    public static string ParaCasar(string url)
+    {
+        if (string.IsNullOrEmpty(url)) return "";
+
+        int p = url.IndexOf("://");
+        if (p < 0) return url;
+
+        int inicioHost = p + 3;
+        if (url.IndexOf('/', inicioHost) >= 0) return url;   // ja tem caminho
+
+        // Sem caminho, mas pode ter consulta ou ancora: a barra entra antes.
+        int corte = url.IndexOfAny(new char[] { '?', '#' }, inicioHost);
+        if (corte < 0) return url + "/";
+        return url.Substring(0, corte) + "/" + url.Substring(corte);
+    }
+
     public static string Host(string url)
     {
         try { return new Uri(url).Host.ToLowerInvariant(); }
@@ -887,6 +911,7 @@ static class Motor
         privado = false;
         motivo = "";
         string host = Host(url);
+        string alvo = ParaCasar(url);
 
         if (shift && c.ForcarShift)
         {
@@ -896,7 +921,7 @@ static class Motor
 
         foreach (Regra r in c.Regras)
         {
-            if (!r.Casa(url, host)) continue;
+            if (!r.Casa(alvo, host)) continue;
             Navegador n = c.Por(r.NavegadorId);
             if (n == null || !n.Existe) continue;
             privado = r.Privado;
