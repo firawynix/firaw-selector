@@ -274,6 +274,100 @@ class Instalador : JanelaFiraw
         ta.InvokeMember("Save", BindingFlags.InvokeMethod, null, a, null);
     }
 
+    // Tudo o que a instalacao faz, com ou sem janela. Sem janela (/S) e como o
+    // Firawynix Center instala e atualiza por cima.
+    static void Executa(string local, bool mesa, bool iniciar, bool registrar, Action<string> status)
+    {
+        Directory.CreateDirectory(local);
+
+        string motor = Path.Combine(local, Amb.Produto + ".exe");
+        string studio = Path.Combine(local, Amb.Produto + " Studio.exe");
+        string host = Path.Combine(local, Amb.Produto + " Host.exe");
+        string desinst = Path.Combine(local, "Desinstalar.exe");
+
+        status(Idioma.T("inst.copiando"));
+
+        try
+        {
+            Extrai(Amb.Produto + ".exe", motor);
+            Extrai(Amb.Produto + " Studio.exe", studio);
+            Extrai(Amb.Produto + " Host.exe", host);
+            ExtraiExtensao(local, "Chrome", "ext.chrome.manifest.json");
+            ExtraiExtensao(local, "Edge", "ext.edge.manifest.json");
+            ExtraiExtensao(local, "Firefox", "ext.firefox.manifest.json");
+        }
+        catch (IOException ex)
+        {
+            throw new ArquivoEmUso(ex);
+        }
+
+        File.Copy(Assembly.GetExecutingAssembly().Location, desinst, true);
+        RegistraHostNativo(local, host);
+
+        status(Idioma.T("inst.atalhos"));
+
+        string desc = Amb.Produto + " - " + Idioma.T("app.tagline");
+        if (mesa)
+            CriaAtalho(Path.Combine(Mesa, Amb.Produto + ".lnk"), studio, "", local, studio + ",0", desc);
+        if (iniciar)
+            CriaAtalho(Path.Combine(MenuIniciar, Amb.Produto + ".lnk"), studio, "", local, studio + ",0", desc);
+
+        long tamanho = 0;
+        foreach (string f in Directory.GetFiles(local, "*", SearchOption.AllDirectories))
+        {
+            try { tamanho += new FileInfo(f).Length; }
+            catch { }
+        }
+
+        RegistryKey k = Registry.CurrentUser.CreateSubKey(Amb.ChaveDesinstalar);
+        k.SetValue("DisplayName", Amb.Produto);
+        k.SetValue("DisplayVersion", Amb.Versao);
+        k.SetValue("DisplayIcon", studio);
+        k.SetValue("Publisher", Amb.Marca);
+        k.SetValue("URLInfoAbout", Amb.Site);
+        k.SetValue("InstallLocation", local);
+        k.SetValue("UninstallString", "\"" + desinst + "\" --uninstall");
+        k.SetValue("EstimatedSize", (int)(tamanho / 1024), RegistryValueKind.DWord);
+        k.SetValue("NoModify", 1, RegistryValueKind.DWord);
+        k.SetValue("NoRepair", 1, RegistryValueKind.DWord);
+        k.Close();
+
+        if (registrar) Registrar.Registra(motor);
+    }
+
+    // Instalar/atualizar sem janela. Nao cria atalho (o Center cria os dele; quem
+    // instalou na mao ja tem os seus) e o resultado vai no codigo de saida:
+    // 0 = ok, 2 = arquivo em uso (programa aberto), 1 = outra falha.
+    static int InstalaSemJanela(string pasta)
+    {
+        string local = pasta;
+        if (string.IsNullOrEmpty(local))
+        {
+            RegistryKey k = Registry.CurrentUser.OpenSubKey(Amb.ChaveDesinstalar);
+            if (k != null) local = (string)k.GetValue("InstallLocation", null);
+        }
+        if (string.IsNullOrEmpty(local)) local = LocalPadrao;
+
+        int codigo;
+        string recado;
+        try
+        {
+            Executa(local, false, false, true, delegate(string texto) { });
+            codigo = 0;
+            recado = "ok";
+        }
+        catch (ArquivoEmUso ex) { codigo = 2; recado = "arquivo em uso: " + ex.Message; }
+        catch (Exception ex) { codigo = 1; recado = ex.Message; }
+
+        try
+        {
+            File.AppendAllText(Path.Combine(Path.GetTempPath(), "firawselector-setup.log"),
+                DateTime.Now.ToString("s") + "  " + Amb.Versao + "  " + local + "  " + recado + Environment.NewLine);
+        }
+        catch { }
+        return codigo;
+    }
+
     void Instalar(object s, EventArgs e)
     {
         string local = txtLocal.Text.Trim();
@@ -286,65 +380,18 @@ class Instalador : JanelaFiraw
         btnInstalar.Enabled = false;
         try
         {
-            Directory.CreateDirectory(local);
-
-            string motor = Path.Combine(local, Amb.Produto + ".exe");
-            string studio = Path.Combine(local, Amb.Produto + " Studio.exe");
-            string host = Path.Combine(local, Amb.Produto + " Host.exe");
-            string desinst = Path.Combine(local, "Desinstalar.exe");
-
-            lblStatus.Text = Idioma.T("inst.copiando");
-            Application.DoEvents();
-
             try
             {
-                Extrai(Amb.Produto + ".exe", motor);
-                Extrai(Amb.Produto + " Studio.exe", studio);
-                Extrai(Amb.Produto + " Host.exe", host);
-                ExtraiExtensao(local, "Chrome", "ext.chrome.manifest.json");
-                ExtraiExtensao(local, "Edge", "ext.edge.manifest.json");
-                ExtraiExtensao(local, "Firefox", "ext.firefox.manifest.json");
+                Executa(local, chkMesa.Checked, chkIniciar.Checked, chkRegistrar.Checked,
+                    delegate(string texto) { lblStatus.Text = texto; Application.DoEvents(); });
             }
-            catch (IOException)
+            catch (ArquivoEmUso)
             {
                 UI.Aviso(this, Idioma.T("inst.aberto", Amb.Produto));
                 return;
             }
 
-            File.Copy(Assembly.GetExecutingAssembly().Location, desinst, true);
-            RegistraHostNativo(local, host);
-
-            lblStatus.Text = Idioma.T("inst.atalhos");
-            Application.DoEvents();
-
-            string desc = Amb.Produto + " - " + Idioma.T("app.tagline");
-            if (chkMesa.Checked)
-                CriaAtalho(Path.Combine(Mesa, Amb.Produto + ".lnk"), studio, "", local, studio + ",0", desc);
-            if (chkIniciar.Checked)
-                CriaAtalho(Path.Combine(MenuIniciar, Amb.Produto + ".lnk"), studio, "", local, studio + ",0", desc);
-
-            long tamanho = 0;
-            foreach (string f in Directory.GetFiles(local, "*", SearchOption.AllDirectories))
-            {
-                try { tamanho += new FileInfo(f).Length; }
-                catch { }
-            }
-
-            RegistryKey k = Registry.CurrentUser.CreateSubKey(Amb.ChaveDesinstalar);
-            k.SetValue("DisplayName", Amb.Produto);
-            k.SetValue("DisplayVersion", Amb.Versao);
-            k.SetValue("DisplayIcon", studio);
-            k.SetValue("Publisher", Amb.Marca);
-            k.SetValue("URLInfoAbout", Amb.Site);
-            k.SetValue("InstallLocation", local);
-            k.SetValue("UninstallString", "\"" + desinst + "\" --uninstall");
-            k.SetValue("EstimatedSize", (int)(tamanho / 1024), RegistryValueKind.DWord);
-            k.SetValue("NoModify", 1, RegistryValueKind.DWord);
-            k.SetValue("NoRepair", 1, RegistryValueKind.DWord);
-            k.Close();
-
-            if (chkRegistrar.Checked) Registrar.Registra(motor);
-
+            string studio = Path.Combine(local, Amb.Produto + " Studio.exe");
             lblStatus.Text = Idioma.T("inst.pronto", local);
 
             if (UI.Confirma(this, Idioma.T("inst.abrirAgora", Amb.Produto)))
@@ -410,6 +457,12 @@ class Instalador : JanelaFiraw
 
     public static void Desinstalar(string local, IWin32Window dono)
     {
+        Desinstalar(local, dono, false);
+    }
+
+    // silencioso = sem pergunta e sem recado no fim (o Center chama "Desinstalar.exe /S")
+    public static void Desinstalar(string local, IWin32Window dono, bool silencioso)
+    {
         if (string.IsNullOrEmpty(local))
         {
             RegistryKey k = Registry.CurrentUser.OpenSubKey(Amb.ChaveDesinstalar);
@@ -422,7 +475,7 @@ class Instalador : JanelaFiraw
         string pergunta = Idioma.T("inst.confirmaRemover",
             Amb.Produto, local, atalhos.Count, Amb.PastaDados);
 
-        if (MessageBox.Show(pergunta, Amb.Produto, MessageBoxButtons.YesNo,
+        if (!silencioso && MessageBox.Show(pergunta, Amb.Produto, MessageBoxButtons.YesNo,
             MessageBoxIcon.Question) != DialogResult.Yes) return;
 
         // O registro de navegador sai primeiro: apagar so os arquivos deixaria o
@@ -455,7 +508,7 @@ class Instalador : JanelaFiraw
         if (presos > 0) recado += "\n" + Idioma.T("inst.presos", presos, local);
         if (eraPadrao) recado += "\n\n" + Idioma.T("inst.eraPadrao");
 
-        MessageBox.Show(recado, Amb.Produto, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        if (!silencioso) MessageBox.Show(recado, Amb.Produto, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
         // Se apaga e apaga a pasta depois que este processo sair.
         try
@@ -471,13 +524,15 @@ class Instalador : JanelaFiraw
     }
 
     [STAThread]
-    static void Main(string[] args)
+    static int Main(string[] args)
     {
-        bool desinstalar = false, doTemp = false;
+        string eu = Assembly.GetExecutingAssembly().Location;
+        bool desinstalar = LinhaSetup.EhDesinstalar(eu, args);
+        bool doTemp = false, silencioso = false;
         foreach (string a in args)
         {
-            if (a == "--uninstall" || a == "/uninstall") desinstalar = true;
             if (a == "--from-temp") doTemp = true;
+            if (LinhaSetup.EhSilencioso(a)) silencioso = true;
         }
 
         // O instalador respeita a config quando ela ja existe (reinstalacao) e,
@@ -499,7 +554,6 @@ class Instalador : JanelaFiraw
 
         if (desinstalar)
         {
-            string eu = Assembly.GetExecutingAssembly().Location;
             string local = null;
             RegistryKey k = Registry.CurrentUser.OpenSubKey(Amb.ChaveDesinstalar);
             if (k != null) local = (string)k.GetValue("InstallLocation", null);
@@ -512,16 +566,64 @@ class Instalador : JanelaFiraw
                 {
                     string copia = Path.Combine(Path.GetTempPath(), "firawselector-desinstalar.exe");
                     File.Copy(eu, copia, true);
-                    System.Diagnostics.Process.Start(copia, "--uninstall --from-temp");
-                    return;
+                    System.Diagnostics.Process p = System.Diagnostics.Process.Start(copia,
+                        "--uninstall --from-temp" + (silencioso ? " /S" : ""));
+                    // Sem janela, quem chamou (o Center) confere o resultado quando
+                    // este processo sai: espera a copia terminar antes.
+                    if (silencioso && p != null)
+                    {
+                        p.WaitForExit();
+                        return p.ExitCode;
+                    }
+                    return 0;
                 }
                 catch { }
             }
 
-            Desinstalar(local, null);
-            return;
+            Desinstalar(local, null, silencioso);
+            return 0;
         }
 
+        if (silencioso) return InstalaSemJanela(LinhaSetup.Pasta(Environment.CommandLine));
+
         Application.Run(new Instalador());
+        return 0;
     }
+}
+
+// Linha de comando do instalador, separada para dar para testar sem instalar
+// nada. /S e /D=<pasta> seguem a convencao do NSIS, que e como o Firawynix
+// Center instala e atualiza sem janela.
+public static class LinhaSetup
+{
+    public static bool EhSilencioso(string arg)
+    {
+        return arg == "/S" || arg == "--silent";
+    }
+
+    // O desinstalador e uma copia deste arquivo, e o Center chama so
+    // "Desinstalar.exe /S" (sem o --uninstall do registro): pelo nome ele sabe
+    // que e para remover — senao reinstalaria tudo por cima.
+    public static bool EhDesinstalar(string exe, string[] args)
+    {
+        foreach (string a in args)
+            if (a == "--uninstall" || a == "/uninstall") return true;
+        return string.Equals(Path.GetFileName(exe), "Desinstalar.exe", StringComparison.OrdinalIgnoreCase);
+    }
+
+    // "/D=" vem por ultimo, sem aspas, e pode ter espaco: sai da linha crua, nao
+    // do args[] (que ja cortou nos espacos).
+    public static string Pasta(string linha)
+    {
+        if (string.IsNullOrEmpty(linha)) return null;
+        int i = linha.IndexOf(" /D=", StringComparison.Ordinal);
+        if (i < 0) return null;
+        string p = linha.Substring(i + 4).Trim().Trim('"');
+        return p.Length > 0 ? p : null;
+    }
+}
+
+class ArquivoEmUso : Exception
+{
+    public ArquivoEmUso(Exception dentro) : base(dentro.Message, dentro) { }
 }

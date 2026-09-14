@@ -1,3 +1,30 @@
+# FirawSelector 1.1.1 — instalação sem janela (Firawynix Center)
+
+O instalador passou a aceitar a linha de comando no formato do NSIS, que é como
+o Firawynix Center instala e **atualiza por cima** sem abrir janela:
+
+| Comando | O que faz |
+|---|---|
+| `FirawSelector-Setup.exe /S` | instala ou atualiza na pasta já instalada (ou na padrão), sem janela |
+| `FirawSelector-Setup.exe /S /D=C:\Outra pasta` | idem, na pasta dada (`/D=` por último, sem aspas) |
+| `Desinstalar.exe /S` | remove sem perguntar e sem aviso no fim |
+
+- Sem janela não cria atalho: o Center cria os dele, e quem instalou à mão já
+  tem os seus. O registro como navegador e o host das extensões são feitos
+  normalmente.
+- Código de saída: `0` ok, `2` arquivo em uso (feche o FirawSelector), `1`
+  outra falha. Cada execução deixa uma linha em `%TEMP%\firawselector-setup.log`.
+- `Desinstalar.exe` se reconhece pelo nome: chamado só com `/S` (sem o
+  `--uninstall` do registro), ele remove em vez de reinstalar.
+- Cada atualização regrava `%LOCALAPPDATA%\FirawSelector\Extensoes`: quem
+  carregou a extensão por essa pasta recebe a versão nova ao reiniciar o
+  navegador.
+
+No Center o item passou a `win_instalador=nsis` (antes `manual`): ele compara a
+`DisplayVersion` instalada com a da última release e roda o instalador novo
+com `/S` antes de abrir. Os três ZIPs das extensões aparecem no item como
+links para `releases/latest/download/`, sempre a versão mais nova.
+
 # FirawSelector 1.1.0 — extensões de navegador
 
 Esta atualização adiciona integração com Google Chrome, Microsoft Edge e
