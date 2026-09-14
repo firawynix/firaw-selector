@@ -1,0 +1,31 @@
+{
+  "name": "firawselector-linux",
+  "version": "1.2.0",
+  "description": "Escolha o navegador certo para cada link no Linux",
+  "main": "main.js",
+  "author": { "name": "Firawynix", "email": "88189816+firawynix@users.noreply.github.com" },
+  "homepage": "https://github.com/firawynix/firaw-selector",
+  "desktopName": "br.com.firawynix.firawselector.desktop",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "start": "electron .",
+    "build:linux": "electron-builder --linux AppImage deb --x64"
+  },
+  "devDependencies": { "electron": "44.3.0", "electron-builder": "26.15.3" },
+  "build": {
+    "appId": "br.com.firawynix.firawselector",
+    "productName": "FirawSelector",
+    "executableName": "firawselector",
+    "directories": { "output": "dist" },
+    "files": ["main.js", "preload.js", "core.js", "index.html", "renderer.js", "styles.css"],
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Network",
+      "syncDesktopName": true,
+      "icon": "../extensions/shared/icon128.png",
+      "mimeTypes": ["x-scheme-handler/http", "x-scheme-handler/https", "text/html"],
+      "artifactName": "FirawSelector-${version}-${arch}.${ext}"
+    }
+  }
+}

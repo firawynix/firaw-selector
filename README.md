@@ -4,6 +4,10 @@ Cada link abre no navegador **certo** — por regra, ou perguntando na hora.
 
 O FirawSelector se registra como navegador do Windows. Quando qualquer programa abre um link (Outlook, Teams, Slack, WhatsApp, um `.html` clicado, a Pesquisa do Windows), ele intercepta e decide:
 
+Também há uma edição nativa para Linux em `linux/`: ela registra um manipulador
+XDG para HTTP/HTTPS, detecta os navegadores instalados e usa o mesmo modelo de
+regras. O AppImage publicado pode ser instalado pelo Firawynix Center.
+
 - **casou com uma regra** → vai direto para o navegador daquela regra, sem janela nenhuma
 - **nenhuma regra casou** → abre a janela de escolha, com os navegadores instalados
 
