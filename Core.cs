@@ -17,7 +17,7 @@ static class Amb
 {
     public const string Produto = "FirawSelector";
     public const string Marca = "Firawynix";
-    public const string Versao = "1.0.6";
+    public const string Versao = "1.1.0";
     public const string Site = "https://firawselector.firawynix.com.br";
     public const string Repo = "https://github.com/firawynix/firaw-selector";
 
@@ -26,6 +26,9 @@ static class Amb
     public const string ChaveCliente = @"Software\Clients\StartMenuInternet\FirawSelector";
     public const string ProgIdUrl = "FirawSelectorURL";
     public const string ProgIdHtml = "FirawSelectorHTML";
+    public const string HostNativo = "com.firawynix.firaw_selector";
+    public const string ExtensaoChromiumId = "ffjnechlggkdfgiooihhflkbbmlcblho";
+    public const string ExtensaoFirefoxId = "firaw-selector@firawynix.com.br";
 
     [DllImport("dwmapi.dll")]
     public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);

@@ -111,6 +111,7 @@ class ItemNavegador : Panel
 class Escolha : JanelaFiraw
 {
     readonly Cfg cfg;
+    readonly bool podeLembrar;
     string url;
     readonly string host;
 
@@ -143,10 +144,11 @@ class Escolha : JanelaFiraw
     public bool Lembrar;
     public string Url { get { return url; } }
 
-    public Escolha(Cfg c, string endereco)
+    public Escolha(Cfg c, string endereco, bool permitirLembrar)
         : base(Idioma.T("esc.titulo"), false, false)
     {
         cfg = c;
+        podeLembrar = permitirLembrar;
         url = endereco;
         host = Motor.Host(endereco);
 
@@ -280,12 +282,15 @@ class Escolha : JanelaFiraw
         chkPrivado = UI.Caixa(Idioma.T("esc.privativo"), 16, y, false);
         Corpo.Controls.Add(chkPrivado);
 
-        chkLembrar = UI.Caixa(Idioma.T("esc.lembrar", string.IsNullOrEmpty(host) ? "?" : host), 180, y, false);
-        chkLembrar.Enabled = cfg.Lembrar && !string.IsNullOrEmpty(host);
-        // Dominio comprido estourava a largura da janela e o texto era cortado
-        // no meio de uma letra; preso ao espaco que sobra, ele termina em "...".
-        chkLembrar.Width = Math.Min(chkLembrar.Width, largura - 16 - 180);
-        Corpo.Controls.Add(chkLembrar);
+        if (podeLembrar)
+        {
+            chkLembrar = UI.Caixa(Idioma.T("esc.lembrar", string.IsNullOrEmpty(host) ? "?" : host), 180, y, false);
+            chkLembrar.Enabled = cfg.Lembrar && !string.IsNullOrEmpty(host);
+            // Dominio comprido estourava a largura da janela e o texto era cortado
+            // no meio de uma letra; preso ao espaco que sobra, ele termina em "...".
+            chkLembrar.Width = Math.Min(chkLembrar.Width, largura - 16 - 180);
+            Corpo.Controls.Add(chkLembrar);
+        }
         y += 30;
 
         Corpo.Controls.Add(UI.Botao(Idioma.T("esc.copiar"), 16, y, 110, delegate
@@ -529,6 +534,7 @@ static class Programa
         List<string> enderecos = new List<string>();
         bool registrar = false, remover = false, config = false;
         bool pegarEdge = false, soltarEdge = false, silencioso = false;
+        bool perguntarAgora = false;
         // null = segue o config; true/false = manda nesta chamada so.
         bool? enxutoAgora = null;
 
@@ -544,6 +550,8 @@ static class Programa
                 case "--capture-edge": pegarEdge = true; break;
                 case "--release-edge": soltarEdge = true; break;
                 case "--silent": silencioso = true; break;
+                case "--ask":
+                case "--perguntar": perguntarAgora = true; break;
                 case "--slim":
                 case "--enxuto": enxutoAgora = true; break;
                 case "--full":
@@ -601,7 +609,17 @@ static class Programa
 
             bool privado;
             string motivo;
-            Navegador n = Motor.Escolhe(cfg, url, Amb.ShiftPressionado(), out privado, out motivo);
+            Navegador n;
+            if (perguntarAgora)
+            {
+                n = null;
+                privado = false;
+                motivo = "extensao";
+            }
+            else
+            {
+                n = Motor.Escolhe(cfg, url, Amb.ShiftPressionado(), out privado, out motivo);
+            }
 
             if (n == null && ultimoEscolhido != null)
             {
@@ -618,7 +636,7 @@ static class Programa
                 // ja com a preferencia nova gravada.
                 while (true)
                 {
-                    janela = new Escolha(cfg, url);
+                    janela = new Escolha(cfg, url, !perguntarAgora);
                     Application.Run(janela);
                     if (!janela.Reabrir) break;
                 }

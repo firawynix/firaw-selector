@@ -43,6 +43,7 @@ O Windows só aceita **um** navegador padrão. Mas o dia a dia não é assim:
 | **Limpar rastreio** | Remove `utm_*`, `fbclid`, `gclid`, `msclkid` e cia. antes de abrir |
 | **Expandir encurtados** | Segue o redirecionamento (HEAD, 5 saltos, 2,5 s) e decide pelo destino real |
 | **Capturar `microsoft-edge:`** | Assume o protocolo que a Pesquisa e os widgets usam para furar o padrão |
+| **Links dentro do navegador** | Extensões para Chrome, Edge e Firefox chamam a mesma janela de escolha em cada clique |
 | **Editar / copiar o link** | Antes de abrir, na própria janela de escolha |
 | **Registro em arquivo** | Endereço, navegador e o **motivo** da decisão |
 | **Português e inglês** | Troca na hora, ou segue o Windows |
@@ -55,6 +56,9 @@ O Windows só aceita **um** navegador padrão. Mas o dia a dia não é assim:
 | **FirawSelector-Setup.exe** | **Comece por aqui.** Instala, cria atalhos, registra a desinstalação e (opcional) já registra como navegador |
 | FirawSelector-Studio.exe | Só o configurador, sem instalar |
 | FirawSelector.exe | Só o motor — é ele que o Windows chama com o link |
+| FirawSelector-Chrome.zip | Extensão para publicar ou carregar no Google Chrome |
+| FirawSelector-Edge.zip | Extensão para publicar ou carregar no Microsoft Edge |
+| FirawSelector-Firefox.zip | Extensão para publicar ou carregar no Mozilla Firefox |
 
 Sem assinatura de código: o SmartScreen avisa na primeira vez. **Mais informações › Executar assim mesmo**.
 
@@ -93,6 +97,7 @@ FirawSelector.exe --unregister       tira o registro
 FirawSelector.exe --capture-edge     assume o protocolo microsoft-edge:
 FirawSelector.exe --release-edge     devolve o protocolo
 FirawSelector.exe --settings         abre o Studio
+FirawSelector.exe --ask <url>        força a janela de escolha, ignorando regras
 FirawSelector.exe --slim <url>       força o modo enxuto só nesta chamada
 FirawSelector.exe --completo <url>   força o modo cheio só nesta chamada
 ```
@@ -101,6 +106,28 @@ FirawSelector.exe --completo <url>   força o modo cheio só nesta chamada
 outro modo sem mexer na sua preferência.
 
 Vários endereços de uma vez: o primeiro pergunta, os outros seguem a mesma escolha.
+
+## Extensões para links dentro do navegador
+
+O instalador copia três extensões para `%LOCALAPPDATA%\FirawSelector\Extensoes` e
+registra automaticamente a ponte nativa usada por elas. A extensão não duplica
+regras nem configurações: ela entrega o endereço ao aplicativo e o
+FirawSelector abre a mesma janela de escolha de sempre.
+
+Para testar uma versão ainda não publicada:
+
+- **Chrome:** abra `chrome://extensions`, ative o modo do desenvolvedor, escolha
+  **Carregar sem compactação** e selecione a pasta `Extensoes\Chrome`.
+- **Edge:** abra `edge://extensions`, ative o modo do desenvolvedor, escolha
+  **Carregar sem pacote** e selecione a pasta `Extensoes\Edge`.
+- **Firefox:** abra `about:debugging#/runtime/this-firefox`, escolha
+  **Carregar extensão temporária** e selecione `Extensoes\Firefox\manifest.json`.
+  A instalação permanente no Firefox exige uma extensão assinada.
+
+São capturados cliques comuns, `Ctrl`/`Shift` + clique, clique do meio e links em
+frames HTTP/HTTPS. Âncoras da própria página continuam funcionando normalmente.
+Páginas internas do navegador, links digitados na barra e navegações iniciadas
+inteiramente por JavaScript não podem ser capturados pelo script da extensão.
 
 ## Configuração
 
@@ -161,8 +188,10 @@ Arquivos:
 | `Modelo.cs` | Navegador, Regra, INI, motor de decisão e registro no Windows |
 | `Janela.cs` | Barra de título própria e os controles no tema |
 | `FirawSelector.cs` | O motor e a janela de escolha |
+| `FirawSelectorHost.cs` | Ponte Native Messaging entre as extensões e o motor |
 | `FirawSelectorStudio.cs` | O configurador |
 | `FirawSelectorSetup.cs` | O instalador (carrega os outros dois dentro) |
+| `extensions/` | Fontes e manifestos das extensões Chrome, Edge e Firefox |
 
 ## Desinstalar
 

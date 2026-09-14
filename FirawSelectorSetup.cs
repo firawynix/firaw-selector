@@ -200,6 +200,66 @@ class Instalador : JanelaFiraw
         }
     }
 
+    static void ExtraiExtensao(string local, string navegador, string manifesto)
+    {
+        string pasta = Path.Combine(local, "Extensoes", navegador);
+        Directory.CreateDirectory(pasta);
+        Extrai(manifesto, Path.Combine(pasta, "manifest.json"));
+        Extrai("ext.background.js", Path.Combine(pasta, "background.js"));
+        Extrai("ext.content.js", Path.Combine(pasta, "content.js"));
+        foreach (string tamanho in new string[] { "16", "32", "48", "128" })
+            Extrai("ext.icon" + tamanho + ".png", Path.Combine(pasta, "icon" + tamanho + ".png"));
+    }
+
+    static string Json(string valor)
+    {
+        return valor.Replace("\\", "\\\\").Replace("\"", "\\\"");
+    }
+
+    static void ApontaHost(string chave, string manifesto)
+    {
+        RegistryKey k = Registry.CurrentUser.CreateSubKey(chave + "\\" + Amb.HostNativo);
+        k.SetValue("", manifesto);
+        k.Close();
+    }
+
+    static void RegistraHostNativo(string local, string host)
+    {
+        string pasta = Path.Combine(local, "Integracao");
+        Directory.CreateDirectory(pasta);
+
+        string chromium = Path.Combine(pasta, Amb.HostNativo + ".chromium.json");
+        string firefox = Path.Combine(pasta, Amb.HostNativo + ".firefox.json");
+
+        string comum = "{\n" +
+            "  \"name\": \"" + Amb.HostNativo + "\",\n" +
+            "  \"description\": \"FirawSelector Native Messaging Host\",\n" +
+            "  \"path\": \"" + Json(host) + "\",\n" +
+            "  \"type\": \"stdio\",\n";
+        File.WriteAllText(chromium, comum +
+            "  \"allowed_origins\": [\"chrome-extension://" +
+            Amb.ExtensaoChromiumId + "/\"]\n}\n", new UTF8Encoding(false));
+        File.WriteAllText(firefox, comum +
+            "  \"allowed_extensions\": [\"" + Amb.ExtensaoFirefoxId + "\"]\n}\n",
+            new UTF8Encoding(false));
+
+        ApontaHost(@"Software\Google\Chrome\NativeMessagingHosts", chromium);
+        ApontaHost(@"Software\Microsoft\Edge\NativeMessagingHosts", chromium);
+        ApontaHost(@"Software\Mozilla\NativeMessagingHosts", firefox);
+    }
+
+    static void RemoveHostNativo()
+    {
+        foreach (string raiz in new string[] {
+            @"Software\Google\Chrome\NativeMessagingHosts",
+            @"Software\Microsoft\Edge\NativeMessagingHosts",
+            @"Software\Mozilla\NativeMessagingHosts" })
+        {
+            try { Registry.CurrentUser.DeleteSubKeyTree(raiz + "\\" + Amb.HostNativo, false); }
+            catch { }
+        }
+    }
+
     static void CriaAtalho(string lnk, string alvo, string args, string dir, string icone, string desc)
     {
         Type t = Type.GetTypeFromProgID("WScript.Shell");
@@ -230,6 +290,7 @@ class Instalador : JanelaFiraw
 
             string motor = Path.Combine(local, Amb.Produto + ".exe");
             string studio = Path.Combine(local, Amb.Produto + " Studio.exe");
+            string host = Path.Combine(local, Amb.Produto + " Host.exe");
             string desinst = Path.Combine(local, "Desinstalar.exe");
 
             lblStatus.Text = Idioma.T("inst.copiando");
@@ -239,6 +300,10 @@ class Instalador : JanelaFiraw
             {
                 Extrai(Amb.Produto + ".exe", motor);
                 Extrai(Amb.Produto + " Studio.exe", studio);
+                Extrai(Amb.Produto + " Host.exe", host);
+                ExtraiExtensao(local, "Chrome", "ext.chrome.manifest.json");
+                ExtraiExtensao(local, "Edge", "ext.edge.manifest.json");
+                ExtraiExtensao(local, "Firefox", "ext.firefox.manifest.json");
             }
             catch (IOException)
             {
@@ -247,6 +312,7 @@ class Instalador : JanelaFiraw
             }
 
             File.Copy(Assembly.GetExecutingAssembly().Location, desinst, true);
+            RegistraHostNativo(local, host);
 
             lblStatus.Text = Idioma.T("inst.atalhos");
             Application.DoEvents();
@@ -362,6 +428,7 @@ class Instalador : JanelaFiraw
         // O registro de navegador sai primeiro: apagar so os arquivos deixaria o
         // Windows mandando links para um programa que nao existe mais.
         Registrar.Remove();
+        RemoveHostNativo();
 
         foreach (string a in atalhos)
         {

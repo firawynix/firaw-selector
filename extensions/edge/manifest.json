@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "FirawSelector para Edge",
+  "description": "Pergunta em qual navegador ou perfil abrir cada link.",
+  "version": "1.1.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtBYTe8mBQHggrhBLfuFsYVGsy4d/2AGGlp9jcKnR8i1RrvyxTKXlV0F+BZstsn9ThdgoSwC2qE7dftSsS5Nox7wkZ5MtlON3lnDKYJpmB6mwWJtJWpp4fMAD/9UoOxkNbZYL877KC+DlcjtZKuE1Jum9gBJM1Pn60jkjJaQpWopJ3tz/pMd7JCAuHInb1CPGzeAUXH751LrYgWZdmqHI/uU6rmVQAKoggGOS/3Q/QZuh3+JZXf0o/iE6shVhHjzDt+WK3qt/AICSbTVCTTwZ8WCERNyGvAI+MR0SzTo+5SXwIhEaGCqC7a1dwAHA7HBvO2pKJSwtmrXOijag95c+wQIDAQAB",
+  "permissions": ["nativeMessaging"],
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ]
+}
