@@ -136,7 +136,7 @@ class Escolha : JanelaFiraw
     /// </summary>
     static readonly Color Chave = Color.FromArgb(255, 0, 254);
 
-    /// <summary>Sai da janela de escolha e volta com o modo cheio.</summary>
+    /// <summary>Sai da janela de escolha e reabre no outro modo.</summary>
     public bool Reabrir;
 
     public Navegador Resultado;
@@ -312,6 +312,16 @@ class Escolha : JanelaFiraw
         lblConta.ForeColor = C.Texto3;
         lblConta.TextAlign = ContentAlignment.MiddleCenter;
         Corpo.Controls.Add(lblConta);
+        y += 38;
+
+        Corpo.Controls.Add(UI.Botao(Idioma.T("esc.modoCompacto"), 16, y, 140, delegate
+        {
+            cfg.Compacto = true;
+            try { cfg.Salvar(); }
+            catch { }
+            Reabrir = true;
+            Close();
+        }, false));
         y += 38;
 
         Label dica = new Label();
@@ -633,8 +643,8 @@ static class Programa
             if (n == null)
             {
                 Escolha janela;
-                // "Modo completo" no rodape fecha e reabre a janela ali mesmo,
-                // ja com a preferencia nova gravada.
+                // A troca de modo fecha e reabre a mesma escolha, já com a
+                // preferência nova gravada.
                 while (true)
                 {
                     janela = new Escolha(cfg, url, !perguntarAgora);

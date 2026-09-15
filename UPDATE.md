@@ -1,3 +1,12 @@
+# FirawSelector 1.1.2 — troca rápida entre os modos
+
+- A janela completa agora oferece o botão **Modo compacto**.
+- A janela compacta mantém o botão **Modo completo**.
+- A troca salva a preferência e reabre a mesma escolha, preservando o link.
+- Os dois caminhos funcionam sem abrir o Studio no meio da navegação.
+
+---
+
 # FirawSelector 1.1.1 — instalação sem janela (Firawynix Center)
 
 O instalador passou a aceitar a linha de comando no formato do NSIS, que é como

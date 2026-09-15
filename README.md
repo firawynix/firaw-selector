@@ -36,6 +36,7 @@ O Windows só aceita **um** navegador padrão. Mas o dia a dia não é assim:
 | **Janela de escolha** | Ícone real de cada navegador, atalho `1`-`9`, `Enter` para o padrão, `Esc` cancela |
 | **Modo enxuto** | Só ícone (grande), nome e número — sem endereço, sem caixas, sem botões |
 | **Sem moldura** | No modo enxuto, só os navegadores flutuando: fundo, barra de título e botões voltam quando o mouse chega, junto com **Configurações** e **Modo completo** |
+| **Troca rápida de modo** | Use **Modo completo** na janela compacta ou **Modo compacto** na janela completa; o seletor reabre o mesmo link e salva a escolha |
 | **Ícone por navegador** | Troque por um `.ico`, ou pelo ícone nº _n_ de dentro de um `.exe`/`.dll` |
 | **Ordem da lista** | Subir/Descer: quem está em primeiro é o `1` na janela de escolha |
 | **Importar / exportar** | Leva a configuração inteira para outra máquina em um `.ini` |

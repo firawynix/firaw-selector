@@ -17,7 +17,7 @@ static class Amb
 {
     public const string Produto = "FirawSelector";
     public const string Marca = "Firawynix";
-    public const string Versao = "1.1.1";
+    public const string Versao = "1.1.2";
     public const string Site = "https://firawselector.firawynix.com.br";
     public const string Repo = "https://github.com/firawynix/firaw-selector";
 
@@ -393,6 +393,7 @@ static class Idioma
         A("esc.editarTit", "Editar o link antes de abrir", "Edit the link before opening");
         A("esc.configurar", "Configurações", "Settings");
         A("esc.modoCompleto", "Modo completo", "Full mode");
+        A("esc.modoCompacto", "Modo compacto", "Compact mode");
 
         // -------- abas do Studio --------
         A("aba.navegadores", "Navegadores", "Browsers");
