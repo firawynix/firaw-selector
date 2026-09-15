@@ -55,6 +55,10 @@ static class Amb
     public static extern int PrivateExtractIcons(string file, int index, int cx, int cy,
         IntPtr[] icons, int[] ids, int count, int flags);
 
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+    static extern int GetCurrentPackageFullName(ref uint packageFullNameLength,
+        StringBuilder packageFullName);
+
     [DllImport("user32.dll")]
     public static extern bool DestroyIcon(IntPtr hIcon);
 
@@ -62,6 +66,14 @@ static class Amb
     public const int WM_NCHITTEST = 0x84;
     public const int HTCAPTION = 2;
     public const int VK_SHIFT = 0x10;
+
+    public static bool EmPacoteMSIX()
+    {
+        const int APPMODEL_ERROR_NO_PACKAGE = 15700;
+        uint tamanho = 0;
+        try { return GetCurrentPackageFullName(ref tamanho, null) != APPMODEL_ERROR_NO_PACKAGE; }
+        catch { return false; }
+    }
 
     public static bool ShiftPressionado()
     {

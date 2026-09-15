@@ -1020,6 +1020,55 @@ static class Motor
 // ---------------------------------------------------------------------------
 static class Registrar
 {
+    static string Json(string valor)
+    {
+        return valor.Replace("\\", "\\\\").Replace("\"", "\\\"");
+    }
+
+    static void ApontaHost(string chave, string manifesto)
+    {
+        using (RegistryKey k = Registry.CurrentUser.CreateSubKey(chave + "\\" + Amb.HostNativo))
+            k.SetValue("", manifesto);
+    }
+
+    /// <summary>
+    /// O caminho de instalação de um MSIX muda a cada versão. Atualiza os
+    /// manifestos do Native Messaging sempre que o app empacotado é aberto.
+    /// </summary>
+    public static void PreparaIntegracaoMSIX()
+    {
+        if (!Amb.EmPacoteMSIX()) return;
+        try
+        {
+            string host = Path.Combine(Amb.PastaExe, Amb.Produto + " Host.exe");
+            if (!File.Exists(host)) return;
+
+            string pasta = Path.Combine(Amb.PastaDados, "Integracao");
+            Directory.CreateDirectory(pasta);
+            string chromium = Path.Combine(pasta, Amb.HostNativo + ".chromium.json");
+            string firefox = Path.Combine(pasta, Amb.HostNativo + ".firefox.json");
+            string comum = "{\n" +
+                "  \"name\": \"" + Amb.HostNativo + "\",\n" +
+                "  \"description\": \"FirawSelector Native Messaging Host\",\n" +
+                "  \"path\": \"" + Json(host) + "\",\n" +
+                "  \"type\": \"stdio\",\n";
+            File.WriteAllText(chromium, comum +
+                "  \"allowed_origins\": [\"chrome-extension://" +
+                Amb.ExtensaoChromiumId + "/\"]\n}\n", new UTF8Encoding(false));
+            File.WriteAllText(firefox, comum +
+                "  \"allowed_extensions\": [\"" + Amb.ExtensaoFirefoxId + "\"]\n}\n",
+                new UTF8Encoding(false));
+
+            ApontaHost(@"Software\Google\Chrome\NativeMessagingHosts", chromium);
+            ApontaHost(@"Software\Microsoft\Edge\NativeMessagingHosts", chromium);
+            ApontaHost(@"Software\Mozilla\NativeMessagingHosts", firefox);
+        }
+        catch (Exception ex)
+        {
+            Amb.Registra("MSIX Native Messaging: " + ex.Message);
+        }
+    }
+
     public static bool EstaRegistrado()
     {
         try
