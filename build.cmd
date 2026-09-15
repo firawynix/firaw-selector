@@ -88,6 +88,9 @@ if errorlevel 1 exit /b 1
 powershell -NoProfile -Command "Compress-Archive -Path 'dist\extensions\firefox\*' -DestinationPath 'dist\FirawSelector-Firefox.zip'"
 if errorlevel 1 exit /b 1
 
+powershell -NoProfile -Command "$names=@('FirawSelector-Setup.exe','FirawSelector.exe','FirawSelector-Studio.exe','FirawSelector-Host.exe','FirawSelector-Chrome.zip','FirawSelector-Edge.zip','FirawSelector-Firefox.zip'); $sha=[Security.Cryptography.SHA256]::Create(); $lines=foreach($name in $names){$stream=[IO.File]::OpenRead((Join-Path $PWD ('dist\'+$name))); try{$bytes=$sha.ComputeHash($stream)}finally{$stream.Dispose()}; ([BitConverter]::ToString($bytes)).Replace('-','').ToLowerInvariant()+'  '+$name}; $sha.Dispose(); [IO.File]::WriteAllLines((Join-Path $PWD 'dist\SHA256SUMS.txt'),$lines,[Text.Encoding]::ASCII); [IO.File]::WriteAllText((Join-Path $PWD 'dist\FirawSelector-Setup.exe.sha256'),$lines[0]+[Environment]::NewLine,[Text.Encoding]::ASCII)"
+if errorlevel 1 exit /b 1
+
 echo.
 echo Pronto. Rode "FirawSelector Setup.exe" para instalar.
 endlocal

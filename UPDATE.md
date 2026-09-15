@@ -1,3 +1,13 @@
+# FirawSelector 1.1.3 — pacote sincronizado
+
+- Recompilação integral do seletor, Studio, host nativo e instalador.
+- Extensões do Chrome, Edge e Firefox empacotadas junto da mesma versão.
+- O processo de compilação agora regenera os hashes SHA-256 de todos os pacotes.
+- Mantida a troca rápida entre os modos completo e compacto.
+- Atualização silenciosa pelo Firawynix Center continua disponível.
+
+---
+
 # FirawSelector 1.1.2 — troca rápida entre os modos
 
 - A janela completa agora oferece o botão **Modo compacto**.
