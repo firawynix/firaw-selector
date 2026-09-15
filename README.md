@@ -50,6 +50,7 @@ O Windows só aceita **um** navegador padrão. Mas o dia a dia não é assim:
 | **Capturar `microsoft-edge:`** | Assume o protocolo que a Pesquisa e os widgets usam para furar o padrão |
 | **Links dentro do navegador** | Extensões para Chrome, Edge e Firefox chamam a mesma janela de escolha em cada clique |
 | **Editar / copiar o link** | Antes de abrir, na própria janela de escolha |
+| **Atalhos de edição** | Todos os campos aceitam `Ctrl+A`, `Ctrl+C`, `Ctrl+X`, `Ctrl+V`, `Ctrl+Z` e `Ctrl+Y` |
 | **Registro em arquivo** | Endereço, navegador e o **motivo** da decisão |
 | **Português e inglês** | Troca na hora, ou segue o Windows |
 | **Tema ciano** | Escuro, claro ou seguindo o Windows — com barra de título própria |
@@ -183,7 +184,7 @@ Não precisa de Visual Studio nem de SDK — o compilador C# já vem no Windows:
 build.cmd
 ```
 
-Gera `FirawSelector.exe`, `FirawSelector Studio.exe` e `FirawSelector Setup.exe`, e copia os três para `dist\`. O ícone (`firawselector.ico`) é gerado por `tools\mkico.cs` na primeira compilação.
+Gera `FirawSelector.exe`, `FirawSelector Studio.exe`, `FirawSelector Host.exe` e `FirawSelector Setup.exe`, e copia os quatro para `dist\`. O mesmo ícone (`firawselector.ico`) é regenerado por `tools\mkico.cs` em toda compilação e aplicado aos quatro executáveis.
 
 Arquivos:
 

@@ -1,3 +1,12 @@
+# FirawSelector 1.1.4 — atalhos e ícones consistentes
+
+- `Ctrl+A`, `Ctrl+C`, `Ctrl+X`, `Ctrl+V`, `Ctrl+Z` e `Ctrl+Y` funcionam nos campos de texto de todas as janelas.
+- O host nativo agora usa o mesmo ícone do seletor, Studio e instalador.
+- O ícone principal é regenerado em toda compilação para evitar resíduos de versões antigas.
+- Os quatro executáveis foram conferidos com a mesma identidade visual.
+
+---
+
 # FirawSelector 1.1.3 — pacote sincronizado
 
 - Recompilação integral do seletor, Studio, host nativo e instalador.

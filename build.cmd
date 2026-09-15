@@ -40,20 +40,18 @@ if "%VER%"=="" (
 >>"VersaoInfo.cs" echo [assembly: AssemblyFileVersion("%VER%.0")]
 set COMUM=%COMUM% VersaoInfo.cs
 
-if not exist "firawselector.ico" (
-    echo [0/5] icone...
-    "%CSC%" /nologo /target:exe /codepage:65001 /r:System.dll /r:System.Drawing.dll /out:"tools\mkico.exe" "tools\mkico.cs"
-    if errorlevel 1 exit /b 1
-    "tools\mkico.exe" "firawselector.ico"
-    if errorlevel 1 exit /b 1
-)
+echo [0/5] icone...
+"%CSC%" /nologo /target:exe /codepage:65001 /r:System.dll /r:System.Drawing.dll /out:"tools\mkico.exe" "tools\mkico.cs"
+if errorlevel 1 exit /b 1
+"tools\mkico.exe" "firawselector.ico"
+if errorlevel 1 exit /b 1
 
 echo [1/5] motor...
 "%CSC%" %OPTS% %REFS% /win32icon:"firawselector.ico" /out:"FirawSelector.exe" FirawSelector.cs %COMUM%
 if errorlevel 1 exit /b 1
 
 echo [2/5] ponte das extensoes...
-"%CSC%" /nologo /target:exe /platform:anycpu /codepage:65001 /optimize+ /r:System.dll /r:System.Web.Extensions.dll /out:"FirawSelector Host.exe" FirawSelectorHost.cs Core.cs VersaoInfo.cs /main:ProgramaHost
+"%CSC%" /nologo /target:exe /platform:anycpu /codepage:65001 /optimize+ /win32icon:"firawselector.ico" /r:System.dll /r:System.Web.Extensions.dll /out:"FirawSelector Host.exe" FirawSelectorHost.cs Core.cs VersaoInfo.cs /main:ProgramaHost
 if errorlevel 1 exit /b 1
 
 echo [3/5] configurador...

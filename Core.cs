@@ -17,7 +17,7 @@ static class Amb
 {
     public const string Produto = "FirawSelector";
     public const string Marca = "Firawynix";
-    public const string Versao = "1.1.3";
+    public const string Versao = "1.1.4";
     public const string Site = "https://firawselector.firawynix.com.br";
     public const string Repo = "https://github.com/firawynix/firaw-selector";
 
@@ -64,6 +64,7 @@ static class Amb
 
     public const int WM_NCLBUTTONDOWN = 0xA1;
     public const int WM_NCHITTEST = 0x84;
+    public const int EM_REDO = 0x454;
     public const int HTCAPTION = 2;
     public const int VK_SHIFT = 0x10;
 

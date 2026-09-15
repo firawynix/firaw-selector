@@ -230,6 +230,52 @@ class JanelaFiraw : Form
         }
         base.WndProc(ref m);
     }
+
+    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+    {
+        TextBoxBase campo = CampoFocado(this);
+        if (campo == null || (keyData & Keys.Modifiers) != Keys.Control)
+            return base.ProcessCmdKey(ref msg, keyData);
+
+        switch (keyData & Keys.KeyCode)
+        {
+            case Keys.A:
+                campo.SelectAll();
+                return true;
+            case Keys.C:
+                campo.Copy();
+                return true;
+            case Keys.X:
+                if (!campo.ReadOnly) campo.Cut();
+                return true;
+            case Keys.V:
+                if (!campo.ReadOnly) campo.Paste();
+                return true;
+            case Keys.Z:
+                if (!campo.ReadOnly && campo.CanUndo) campo.Undo();
+                return true;
+            case Keys.Y:
+                if (!campo.ReadOnly)
+                    Amb.SendMessage(campo.Handle, Amb.EM_REDO, IntPtr.Zero, IntPtr.Zero);
+                return true;
+            default:
+                return base.ProcessCmdKey(ref msg, keyData);
+        }
+    }
+
+    static TextBoxBase CampoFocado(Control raiz)
+    {
+        TextBoxBase campo = raiz as TextBoxBase;
+        if (campo != null && campo.Focused) return campo;
+
+        foreach (Control filho in raiz.Controls)
+        {
+            if (!filho.ContainsFocus) continue;
+            TextBoxBase encontrado = CampoFocado(filho);
+            if (encontrado != null) return encontrado;
+        }
+        return null;
+    }
 }
 
 // ---------------------------------------------------------------------------
