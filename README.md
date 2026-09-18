@@ -207,6 +207,11 @@ Configurações › Aplicativos › **FirawSelector** › Desinstalar. Ele tira 
 
 Firawynix · [firawselector.firawynix.com.br](https://firawselector.firawynix.com.br)
 
+## Privacidade e assinatura
+
+- [Política de privacidade](privacy.md)
+- [Política de assinatura de código](code-signing-policy.md)
+
 ## Licença
 
 O FirawSelector é software livre distribuído sob a [licença MIT](LICENSE).
