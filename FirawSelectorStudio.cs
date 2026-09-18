@@ -1349,8 +1349,6 @@ class Studio : JanelaFiraw
     {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
-        Registrar.PreparaIntegracaoMSIX();
-
         string aba = "navegadores";
         foreach (string a in args)
         {

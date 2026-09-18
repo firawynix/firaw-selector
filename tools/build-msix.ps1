@@ -73,13 +73,10 @@ New-Item -ItemType Directory -Path (Join-Path $stage 'Assets') -Force | Out-Null
 
 foreach ($file in @(
     'FirawSelector.exe',
-    'FirawSelector Studio.exe',
-    'FirawSelector Host.exe'
+    'FirawSelector Studio.exe'
 )) {
     Copy-Item -LiteralPath (Join-Path $projectRoot $file) -Destination $stage
 }
-Copy-Item -LiteralPath (Join-Path $projectRoot 'extensions') `
-    -Destination (Join-Path $stage 'Extensions') -Recurse
 
 $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 if (-not (Test-Path -LiteralPath $csc)) {

@@ -3,7 +3,7 @@ param()
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
-$packagePath = Join-Path $projectRoot 'dist\FirawSelector-1.1.4.0-x86-sideload.msix'
+$packagePath = Join-Path $projectRoot 'dist\FirawSelector-1.1.5.0-x86-sideload.msix'
 $certificatePath = Join-Path $projectRoot 'dist\Firawynix-Laboratorio.cer'
 $reportPath = Join-Path $projectRoot 'dist\msix-install-result.json'
 $identity = 'Firawynix.FirawSelector.Lab'

@@ -1,3 +1,14 @@
+# FirawSelector 1.1.5 — MSIX compatível com a Microsoft Store
+
+- O pacote MSIX não solicita mais a capacidade restrita
+  `unvirtualizedResources`.
+- Protocolos HTTP/HTTPS/FTP, `microsoft-edge` e arquivos HTML continuam
+  registrados pelo manifesto do pacote.
+- A integração opcional com extensões de navegador permanece disponível no
+  instalador clássico, sem reduzir as funções principais da versão da Store.
+
+---
+
 # FirawSelector 1.1.4 — atalhos e ícones consistentes
 
 - `Ctrl+A`, `Ctrl+C`, `Ctrl+X`, `Ctrl+V`, `Ctrl+Z` e `Ctrl+Y` funcionam nos campos de texto de todas as janelas.

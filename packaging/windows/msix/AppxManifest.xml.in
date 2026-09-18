@@ -4,9 +4,8 @@
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
   xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
-  xmlns:desktop6="http://schemas.microsoft.com/appx/manifest/desktop/windows10/6"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap uap3 uap10 desktop6 rescap">
+  IgnorableNamespaces="uap uap3 uap10 rescap">
   <Identity
     Name="@@PACKAGE_NAME@@"
     Publisher="@@PUBLISHER@@"
@@ -17,8 +16,6 @@
     <PublisherDisplayName>Firawynix</PublisherDisplayName>
     <Description>Escolha em qual navegador cada link deve abrir.</Description>
     <Logo>Assets\StoreLogo.png</Logo>
-    <desktop6:RegistryWriteVirtualization>disabled</desktop6:RegistryWriteVirtualization>
-    <desktop6:FileSystemWriteVirtualization>disabled</desktop6:FileSystemWriteVirtualization>
   </Properties>
   <Resources>
     <Resource Language="pt-BR" />
@@ -85,6 +82,5 @@
   </Applications>
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
-    <rescap:Capability Name="unvirtualizedResources" />
   </Capabilities>
 </Package>

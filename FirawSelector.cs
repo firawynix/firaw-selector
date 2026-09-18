@@ -573,8 +573,6 @@ static class Programa
         }
 
         string eu = Application.ExecutablePath;
-        Registrar.PreparaIntegracaoMSIX();
-
         if (registrar)
         {
             Registrar.Registra(eu);

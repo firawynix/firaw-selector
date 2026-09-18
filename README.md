@@ -200,6 +200,11 @@ identidade oficial `Firawynix.FirawSelector` reservada no Partner Center.
 separada e o certificado local de laboratório para testes de sideload. Consulte
 `packaging/windows/msix/README.md` antes de distribuir o pacote.
 
+O MSIX usa as associações nativas do manifesto para links e arquivos HTML. A
+integração opcional com extensões do Chrome, Edge e Firefox fica no instalador
+clássico, pois o contêiner MSIX isola as chaves de Native Messaging que precisam
+ser lidas por esses navegadores.
+
 Arquivos:
 
 | Arquivo | O que é |

@@ -27,7 +27,11 @@ O pacote de laboratório usa identidade separada e é assinado com o certificado
 conflita com a versão da Store e não deve ser distribuído como assinatura
 pública.
 
-O manifesto desabilita a virtualização do registro e do AppData porque o
-FirawSelector precisa registrar a ponte de Native Messaging e compartilhar a
-configuração com as extensões e a instalação clássica. Por isso o pacote declara
-as capacidades restritas `runFullTrust` e `unvirtualizedResources`.
+O pacote da Store declara somente `runFullTrust`. Os protocolos HTTP/HTTPS/FTP,
+o protocolo `microsoft-edge` e os arquivos HTML são associados pelo próprio
+manifesto, sem desabilitar a virtualização do Windows.
+
+A ponte de Native Messaging para extensões do Chrome, Edge e Firefox não é
+incluída no MSIX: esses navegadores precisam enxergar chaves HKCU globais, que
+ficam isoladas no contêiner do pacote. Quem precisa capturar também os cliques
+dentro do navegador deve usar o instalador clássico disponibilizado no site.
