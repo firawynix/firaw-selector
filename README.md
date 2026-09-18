@@ -186,6 +186,20 @@ build.cmd
 
 Gera `FirawSelector.exe`, `FirawSelector Studio.exe`, `FirawSelector Host.exe` e `FirawSelector Setup.exe`, e copia os quatro para `dist\`. O mesmo ícone (`firawselector.ico`) é regenerado por `tools\mkico.cs` em toda compilação e aplicado aos quatro executáveis.
 
+### MSIX e Microsoft Store
+
+O empacotamento reproduzível fica em `packaging/windows/msix/` e usa a
+identidade oficial `Firawynix.FirawSelector` reservada no Partner Center.
+
+```powershell
+.\tools\build-msix.ps1 -Channel Store
+.\tools\build-msix.ps1 -Channel Lab
+```
+
+`Store` gera o pacote de upload com a identidade oficial; `Lab` usa identidade
+separada e o certificado local de laboratório para testes de sideload. Consulte
+`packaging/windows/msix/README.md` antes de distribuir o pacote.
+
 Arquivos:
 
 | Arquivo | O que é |

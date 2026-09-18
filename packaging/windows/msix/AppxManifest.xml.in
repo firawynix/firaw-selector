@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
+  xmlns:desktop6="http://schemas.microsoft.com/appx/manifest/desktop/windows10/6"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap uap3 uap10 desktop6 rescap">
+  <Identity
+    Name="@@PACKAGE_NAME@@"
+    Publisher="@@PUBLISHER@@"
+    Version="@@VERSION@@"
+    ProcessorArchitecture="x86" />
+  <Properties>
+    <DisplayName>FirawSelector</DisplayName>
+    <PublisherDisplayName>Firawynix</PublisherDisplayName>
+    <Description>Escolha em qual navegador cada link deve abrir.</Description>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <desktop6:RegistryWriteVirtualization>disabled</desktop6:RegistryWriteVirtualization>
+    <desktop6:FileSystemWriteVirtualization>disabled</desktop6:FileSystemWriteVirtualization>
+  </Properties>
+  <Resources>
+    <Resource Language="pt-BR" />
+    <Resource Language="en-US" />
+  </Resources>
+  <Dependencies>
+    <TargetDeviceFamily
+      Name="Windows.Desktop"
+      MinVersion="10.0.19041.0"
+      MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+  <Applications>
+    <Application
+      Id="App"
+      Executable="FirawSelector.exe"
+      uap10:RuntimeBehavior="packagedClassicApp"
+      uap10:TrustLevel="mediumIL">
+      <uap:VisualElements
+        DisplayName="FirawSelector"
+        Description="Escolha em qual navegador cada link deve abrir."
+        BackgroundColor="transparent"
+        Square44x44Logo="Assets\Square44x44Logo.png"
+        Square150x150Logo="Assets\Square150x150Logo.png" />
+      <Extensions>
+        <uap3:Extension
+          Category="windows.protocol"
+          Executable="FirawSelector.exe"
+          EntryPoint="Windows.FullTrustApplication">
+          <uap3:Protocol Name="http" Parameters="&quot;%1&quot;" />
+        </uap3:Extension>
+        <uap3:Extension
+          Category="windows.protocol"
+          Executable="FirawSelector.exe"
+          EntryPoint="Windows.FullTrustApplication">
+          <uap3:Protocol Name="https" Parameters="&quot;%1&quot;" />
+        </uap3:Extension>
+        <uap3:Extension
+          Category="windows.protocol"
+          Executable="FirawSelector.exe"
+          EntryPoint="Windows.FullTrustApplication">
+          <uap3:Protocol Name="ftp" Parameters="&quot;%1&quot;" />
+        </uap3:Extension>
+        <uap3:Extension
+          Category="windows.protocol"
+          Executable="FirawSelector.exe"
+          EntryPoint="Windows.FullTrustApplication">
+          <uap3:Protocol Name="microsoft-edge" Parameters="&quot;%1&quot;" />
+        </uap3:Extension>
+        <uap:Extension
+          Category="windows.fileTypeAssociation"
+          Executable="FirawSelector.exe"
+          EntryPoint="Windows.FullTrustApplication">
+          <uap:FileTypeAssociation Name="firawselector-html">
+            <uap:DisplayName>Documento HTML</uap:DisplayName>
+            <uap:SupportedFileTypes>
+              <uap:FileType ContentType="text/html">.htm</uap:FileType>
+              <uap:FileType ContentType="text/html">.html</uap:FileType>
+              <uap:FileType ContentType="application/xhtml+xml">.xhtml</uap:FileType>
+            </uap:SupportedFileTypes>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+    <rescap:Capability Name="unvirtualizedResources" />
+  </Capabilities>
+</Package>

@@ -69,6 +69,7 @@ static class MkIco
     static void Main(string[] args)
     {
         string saida = args.Length > 0 ? args[0] : "firawselector.ico";
+        string pastaPng = args.Length > 1 ? args[1] : "";
         int[] tamanhos = new int[] { 16, 20, 24, 32, 40, 48, 64, 128, 256 };
 
         List<byte[]> pngs = new List<byte[]>();
@@ -106,5 +107,23 @@ static class MkIco
             foreach (byte[] png in pngs) w.Write(png);
         }
         Console.WriteLine("ok: " + saida + " (" + tamanhos.Length + " tamanhos)");
+
+        if (!String.IsNullOrWhiteSpace(pastaPng))
+        {
+            Directory.CreateDirectory(pastaPng);
+            Dictionary<string, int> ativos = new Dictionary<string, int>
+            {
+                { "StoreLogo.png", 50 },
+                { "Square44x44Logo.png", 44 },
+                { "Square150x150Logo.png", 150 },
+                { "Square310x310Logo.png", 310 }
+            };
+            foreach (KeyValuePair<string, int> ativo in ativos)
+            {
+                using (Bitmap bm = Desenha(ativo.Value))
+                    bm.Save(Path.Combine(pastaPng, ativo.Key), ImageFormat.Png);
+            }
+            Console.WriteLine("ok: ativos MSIX em " + pastaPng);
+        }
     }
 }

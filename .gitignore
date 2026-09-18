@@ -2,6 +2,7 @@
 *.exe
 *.pdb
 dist/
+build/
 
 # icone gerado pelo tools/mkico.cs na primeira compilacao
 firawselector.ico
