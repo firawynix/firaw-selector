@@ -49,17 +49,25 @@ if errorlevel 1 exit /b 1
 echo [1/5] motor...
 "%CSC%" %OPTS% %REFS% /win32icon:"firawselector.ico" /out:"FirawSelector.exe" FirawSelector.cs %COMUM%
 if errorlevel 1 exit /b 1
+call :sign "FirawSelector.exe"
+if errorlevel 1 exit /b 1
 
 echo [2/5] ponte das extensoes...
 "%CSC%" /nologo /target:exe /platform:anycpu /codepage:65001 /optimize+ /win32icon:"firawselector.ico" /r:System.dll /r:System.Web.Extensions.dll /out:"FirawSelector Host.exe" FirawSelectorHost.cs Core.cs VersaoInfo.cs /main:ProgramaHost
+if errorlevel 1 exit /b 1
+call :sign "FirawSelector Host.exe"
 if errorlevel 1 exit /b 1
 
 echo [3/5] configurador...
 "%CSC%" %OPTS% %REFS% /win32icon:"firawselector.ico" /out:"FirawSelector Studio.exe" FirawSelectorStudio.cs %COMUM%
 if errorlevel 1 exit /b 1
+call :sign "FirawSelector Studio.exe"
+if errorlevel 1 exit /b 1
 
 echo [4/5] instalador...
 "%CSC%" %OPTS% %REFS% /win32icon:"firawselector.ico" /resource:"FirawSelector.exe" /resource:"FirawSelector Studio.exe" /resource:"FirawSelector Host.exe" /resource:"extensions\chrome\manifest.json",ext.chrome.manifest.json /resource:"extensions\edge\manifest.json",ext.edge.manifest.json /resource:"extensions\firefox\manifest.json",ext.firefox.manifest.json /resource:"extensions\shared\background.js",ext.background.js /resource:"extensions\shared\content.js",ext.content.js /resource:"extensions\shared\icon16.png",ext.icon16.png /resource:"extensions\shared\icon32.png",ext.icon32.png /resource:"extensions\shared\icon48.png",ext.icon48.png /resource:"extensions\shared\icon128.png",ext.icon128.png /out:"FirawSelector Setup.exe" FirawSelectorSetup.cs %COMUM%
+if errorlevel 1 exit /b 1
+call :sign "FirawSelector Setup.exe"
 if errorlevel 1 exit /b 1
 
 echo [5/5] copiando para dist...
@@ -91,4 +99,13 @@ if errorlevel 1 exit /b 1
 
 echo.
 echo Pronto. Rode "FirawSelector Setup.exe" para instalar.
-endlocal
+exit /b 0
+
+:sign
+if not defined FIRAW_SIGNING_THUMBPRINT exit /b 0
+if not defined FIRAW_SIGNTOOL (
+    echo FIRAW_SIGNTOOL nao foi informado para assinar %~1.
+    exit /b 1
+)
+"%FIRAW_SIGNTOOL%" sign /fd sha256 /sha1 "%FIRAW_SIGNING_THUMBPRINT%" /d "FirawSelector" /tr http://timestamp.digicert.com /td sha256 %1
+exit /b %ERRORLEVEL%
