@@ -1,0 +1,31 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build application, host, studio, and installer
+        shell: cmd
+        run: build.cmd
+      - uses: actions/upload-artifact@v4
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: firaw-selector-${{ github.ref_name }}
+          path: |
+            dist/FirawSelector.exe
+            dist/FirawSelector Host.exe
+            dist/FirawSelector Studio.exe
+            dist/FirawSelector Setup.exe
+          if-no-files-found: error
+
