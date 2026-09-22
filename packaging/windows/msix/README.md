@@ -31,7 +31,7 @@ O pacote da Store declara somente `runFullTrust`. Os protocolos HTTP/HTTPS/FTP,
 o protocolo `microsoft-edge` e os arquivos HTML são associados pelo próprio
 manifesto, sem desabilitar a virtualização do Windows.
 
-A ponte de Native Messaging para extensões do Chrome, Edge e Firefox não é
+A ponte de Native Messaging para extensões do Chrome, Edge, Opera e Firefox não é
 incluída no MSIX: esses navegadores precisam enxergar chaves HKCU globais, que
 ficam isoladas no contêiner do pacote. Quem precisa capturar também os cliques
 dentro do navegador deve usar o instalador clássico disponibilizado no site.
