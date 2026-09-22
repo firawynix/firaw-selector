@@ -296,6 +296,7 @@ class Instalador : JanelaFiraw
             Extrai("FirawAutoUpdate.exe", atualizador);
             ExtraiExtensao(local, "Chrome", "ext.chrome.manifest.json");
             ExtraiExtensao(local, "Edge", "ext.edge.manifest.json");
+            ExtraiExtensao(local, "Opera", "ext.opera.manifest.json");
             ExtraiExtensao(local, "Firefox", "ext.firefox.manifest.json");
         }
         catch (IOException ex)

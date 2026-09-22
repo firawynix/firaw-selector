@@ -48,7 +48,7 @@ O Windows só aceita **um** navegador padrão. Mas o dia a dia não é assim:
 | **Limpar rastreio** | Remove `utm_*`, `fbclid`, `gclid`, `msclkid` e cia. antes de abrir |
 | **Expandir encurtados** | Segue o redirecionamento (HEAD, 5 saltos, 2,5 s) e decide pelo destino real |
 | **Capturar `microsoft-edge:`** | Assume o protocolo que a Pesquisa e os widgets usam para furar o padrão |
-| **Links dentro do navegador** | Extensões para Chrome, Edge e Firefox chamam a mesma janela de escolha em cada clique |
+| **Links dentro do navegador** | Extensões para Chrome, Edge, Opera e Firefox chamam a mesma janela de escolha em cada clique |
 | **Editar / copiar o link** | Antes de abrir, na própria janela de escolha |
 | **Atalhos de edição** | Todos os campos aceitam `Ctrl+A`, `Ctrl+C`, `Ctrl+X`, `Ctrl+V`, `Ctrl+Z` e `Ctrl+Y` |
 | **Registro em arquivo** | Endereço, navegador e o **motivo** da decisão |
@@ -64,6 +64,7 @@ O Windows só aceita **um** navegador padrão. Mas o dia a dia não é assim:
 | FirawSelector.exe | Só o motor — é ele que o Windows chama com o link |
 | FirawSelector-Chrome.zip | Extensão para publicar ou carregar no Google Chrome |
 | FirawSelector-Edge.zip | Extensão para publicar ou carregar no Microsoft Edge |
+| FirawSelector-Opera.zip | Extensão para publicar ou carregar no Opera |
 | FirawSelector-Firefox.zip | Extensão para publicar ou carregar no Mozilla Firefox |
 
 Sem assinatura de código: o SmartScreen avisa na primeira vez. **Mais informações › Executar assim mesmo**.
@@ -115,7 +116,7 @@ Vários endereços de uma vez: o primeiro pergunta, os outros seguem a mesma esc
 
 ## Extensões para links dentro do navegador
 
-O instalador copia três extensões para `%LOCALAPPDATA%\FirawSelector\Extensoes` e
+O instalador copia quatro extensões para `%LOCALAPPDATA%\FirawSelector\Extensoes` e
 registra automaticamente a ponte nativa usada por elas. A extensão não duplica
 regras nem configurações: ela entrega o endereço ao aplicativo e o
 FirawSelector abre a mesma janela de escolha de sempre.
@@ -126,6 +127,8 @@ Para testar uma versão ainda não publicada:
   **Carregar sem compactação** e selecione a pasta `Extensoes\Chrome`.
 - **Edge:** abra `edge://extensions`, ative o modo do desenvolvedor, escolha
   **Carregar sem pacote** e selecione a pasta `Extensoes\Edge`.
+- **Opera:** abra `opera://extensions`, ative o modo do desenvolvedor, escolha
+  **Carregar sem pacote** e selecione a pasta `Extensoes\Opera`.
 - **Firefox:** abra `about:debugging#/runtime/this-firefox`, escolha
   **Carregar extensão temporária** e selecione `Extensoes\Firefox\manifest.json`.
   A instalação permanente no Firefox exige uma extensão assinada.
@@ -201,7 +204,7 @@ separada e o certificado local de laboratório para testes de sideload. Consulte
 `packaging/windows/msix/README.md` antes de distribuir o pacote.
 
 O MSIX usa as associações nativas do manifesto para links e arquivos HTML. A
-integração opcional com extensões do Chrome, Edge e Firefox fica no instalador
+integração opcional com extensões do Chrome, Edge, Opera e Firefox fica no instalador
 clássico, pois o contêiner MSIX isola as chaves de Native Messaging que precisam
 ser lidas por esses navegadores.
 
@@ -216,7 +219,7 @@ Arquivos:
 | `FirawSelectorHost.cs` | Ponte Native Messaging entre as extensões e o motor |
 | `FirawSelectorStudio.cs` | O configurador |
 | `FirawSelectorSetup.cs` | O instalador (carrega os outros dois dentro) |
-| `extensions/` | Fontes e manifestos das extensões Chrome, Edge e Firefox |
+| `extensions/` | Fontes e manifestos das extensões Chrome, Edge, Opera e Firefox |
 
 ## Desinstalar
 

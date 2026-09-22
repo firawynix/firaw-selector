@@ -69,7 +69,7 @@ call :sign "FirawSelector Studio.exe"
 if errorlevel 1 exit /b 1
 
 echo [4/5] instalador...
-"%CSC%" %OPTS% %REFS% /win32icon:"firawselector.ico" /resource:"FirawSelector.exe" /resource:"FirawSelector Studio.exe" /resource:"FirawSelector Host.exe" /resource:"FirawAutoUpdate.exe" /resource:"extensions\chrome\manifest.json",ext.chrome.manifest.json /resource:"extensions\edge\manifest.json",ext.edge.manifest.json /resource:"extensions\firefox\manifest.json",ext.firefox.manifest.json /resource:"extensions\shared\background.js",ext.background.js /resource:"extensions\shared\content.js",ext.content.js /resource:"extensions\shared\icon16.png",ext.icon16.png /resource:"extensions\shared\icon32.png",ext.icon32.png /resource:"extensions\shared\icon48.png",ext.icon48.png /resource:"extensions\shared\icon128.png",ext.icon128.png /out:"FirawSelector Setup.exe" FirawSelectorSetup.cs %COMUM%
+"%CSC%" %OPTS% %REFS% /win32icon:"firawselector.ico" /resource:"FirawSelector.exe" /resource:"FirawSelector Studio.exe" /resource:"FirawSelector Host.exe" /resource:"FirawAutoUpdate.exe" /resource:"extensions\chrome\manifest.json",ext.chrome.manifest.json /resource:"extensions\edge\manifest.json",ext.edge.manifest.json /resource:"extensions\opera\manifest.json",ext.opera.manifest.json /resource:"extensions\firefox\manifest.json",ext.firefox.manifest.json /resource:"extensions\shared\background.js",ext.background.js /resource:"extensions\shared\content.js",ext.content.js /resource:"extensions\shared\icon16.png",ext.icon16.png /resource:"extensions\shared\icon32.png",ext.icon32.png /resource:"extensions\shared\icon48.png",ext.icon48.png /resource:"extensions\shared\icon128.png",ext.icon128.png /out:"FirawSelector Setup.exe" FirawSelectorSetup.cs %COMUM%
 if errorlevel 1 exit /b 1
 call :sign "FirawSelector Setup.exe"
 if errorlevel 1 exit /b 1
@@ -84,22 +84,24 @@ copy /y "FirawAutoUpdate.exe" "dist\FirawAutoUpdate.exe" >nul
 copy /y "UPDATE.md" "dist\UPDATE.md" >nul
 
 if exist "dist\extensions" rmdir /s /q "dist\extensions"
-for %%b in (chrome edge firefox) do (
+for %%b in (chrome edge opera firefox) do (
     mkdir "dist\extensions\%%b"
     copy /y "extensions\%%b\manifest.json" "dist\extensions\%%b\manifest.json" >nul
     copy /y "extensions\shared\background.js" "dist\extensions\%%b\background.js" >nul
     copy /y "extensions\shared\content.js" "dist\extensions\%%b\content.js" >nul
     copy /y "extensions\shared\icon*.png" "dist\extensions\%%b\" >nul
 )
-for %%b in (Chrome Edge Firefox) do if exist "dist\FirawSelector-%%b.zip" del /q "dist\FirawSelector-%%b.zip"
+for %%b in (Chrome Edge Opera Firefox) do if exist "dist\FirawSelector-%%b.zip" del /q "dist\FirawSelector-%%b.zip"
 powershell -NoProfile -Command "Compress-Archive -Path 'dist\extensions\chrome\*' -DestinationPath 'dist\FirawSelector-Chrome.zip'"
 if errorlevel 1 exit /b 1
 powershell -NoProfile -Command "Compress-Archive -Path 'dist\extensions\edge\*' -DestinationPath 'dist\FirawSelector-Edge.zip'"
 if errorlevel 1 exit /b 1
+powershell -NoProfile -Command "Compress-Archive -Path 'dist\extensions\opera\*' -DestinationPath 'dist\FirawSelector-Opera.zip'"
+if errorlevel 1 exit /b 1
 powershell -NoProfile -Command "Compress-Archive -Path 'dist\extensions\firefox\*' -DestinationPath 'dist\FirawSelector-Firefox.zip'"
 if errorlevel 1 exit /b 1
 
-powershell -NoProfile -Command "$names=@('FirawSelector-Setup.exe','FirawSelector.exe','FirawSelector-Studio.exe','FirawSelector-Host.exe','FirawSelector-Chrome.zip','FirawSelector-Edge.zip','FirawSelector-Firefox.zip'); $sha=[Security.Cryptography.SHA256]::Create(); $lines=foreach($name in $names){$stream=[IO.File]::OpenRead((Join-Path $PWD ('dist\'+$name))); try{$bytes=$sha.ComputeHash($stream)}finally{$stream.Dispose()}; ([BitConverter]::ToString($bytes)).Replace('-','').ToLowerInvariant()+'  '+$name}; $sha.Dispose(); [IO.File]::WriteAllLines((Join-Path $PWD 'dist\SHA256SUMS.txt'),$lines,[Text.Encoding]::ASCII); [IO.File]::WriteAllText((Join-Path $PWD 'dist\FirawSelector-Setup.exe.sha256'),$lines[0]+[Environment]::NewLine,[Text.Encoding]::ASCII)"
+powershell -NoProfile -Command "$names=@('FirawSelector-Setup.exe','FirawSelector.exe','FirawSelector-Studio.exe','FirawSelector-Host.exe','FirawSelector-Chrome.zip','FirawSelector-Edge.zip','FirawSelector-Opera.zip','FirawSelector-Firefox.zip'); $sha=[Security.Cryptography.SHA256]::Create(); $lines=foreach($name in $names){$stream=[IO.File]::OpenRead((Join-Path $PWD ('dist\'+$name))); try{$bytes=$sha.ComputeHash($stream)}finally{$stream.Dispose()}; ([BitConverter]::ToString($bytes)).Replace('-','').ToLowerInvariant()+'  '+$name}; $sha.Dispose(); [IO.File]::WriteAllLines((Join-Path $PWD 'dist\SHA256SUMS.txt'),$lines,[Text.Encoding]::ASCII); [IO.File]::WriteAllText((Join-Path $PWD 'dist\FirawSelector-Setup.exe.sha256'),$lines[0]+[Environment]::NewLine,[Text.Encoding]::ASCII)"
 if errorlevel 1 exit /b 1
 
 echo.
