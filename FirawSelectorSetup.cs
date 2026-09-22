@@ -236,9 +236,17 @@ class Instalador : JanelaFiraw
             "  \"description\": \"FirawSelector Native Messaging Host\",\n" +
             "  \"path\": \"" + Json(host) + "\",\n" +
             "  \"type\": \"stdio\",\n";
+        string[] extensoesChromium = {
+            Amb.ExtensaoChromiumId, // testes locais
+            "pbpiicfdmcemelbgclfbeomgadeakbpm", // Chrome Web Store
+            "feegdboplakfllglibmfjcocjognbino", // Microsoft Edge Add-ons
+            "ekjeojgbkjlhlmgdddpomnabkinmgajf"  // Opera Add-ons
+        };
+        string[] origens = Array.ConvertAll(extensoesChromium,
+            id => "\"chrome-extension://" + id + "/\"");
         File.WriteAllText(chromium, comum +
-            "  \"allowed_origins\": [\"chrome-extension://" +
-            Amb.ExtensaoChromiumId + "/\"]\n}\n", new UTF8Encoding(false));
+            "  \"allowed_origins\": [" + string.Join(", ", origens) + "]\n}\n",
+            new UTF8Encoding(false));
         File.WriteAllText(firefox, comum +
             "  \"allowed_extensions\": [\"" + Amb.ExtensaoFirefoxId + "\"]\n}\n",
             new UTF8Encoding(false));

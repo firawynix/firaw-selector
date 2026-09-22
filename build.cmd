@@ -91,12 +91,14 @@ for %%b in (chrome edge opera firefox) do (
     copy /y "extensions\shared\content.js" "dist\extensions\%%b\content.js" >nul
     copy /y "extensions\shared\icon*.png" "dist\extensions\%%b\" >nul
 )
+powershell -NoProfile -Command "foreach($browser in @('chrome','edge','opera')) { $src='dist\extensions\'+$browser; $dst=$src+'-store'; New-Item -ItemType Directory -Path $dst | Out-Null; Copy-Item -Path ($src+'\*') -Destination $dst; $p=Join-Path $dst 'manifest.json'; $m=Get-Content -LiteralPath $p -Raw | ConvertFrom-Json; $m.PSObject.Properties.Remove('key'); [IO.File]::WriteAllText((Join-Path $PWD $p),($m | ConvertTo-Json -Depth 20),(New-Object Text.UTF8Encoding($false))) }"
+if errorlevel 1 exit /b 1
 for %%b in (Chrome Edge Opera Firefox) do if exist "dist\FirawSelector-%%b.zip" del /q "dist\FirawSelector-%%b.zip"
-powershell -NoProfile -Command "Compress-Archive -Path 'dist\extensions\chrome\*' -DestinationPath 'dist\FirawSelector-Chrome.zip'"
+powershell -NoProfile -Command "Compress-Archive -Path 'dist\extensions\chrome-store\*' -DestinationPath 'dist\FirawSelector-Chrome.zip'"
 if errorlevel 1 exit /b 1
-powershell -NoProfile -Command "Compress-Archive -Path 'dist\extensions\edge\*' -DestinationPath 'dist\FirawSelector-Edge.zip'"
+powershell -NoProfile -Command "Compress-Archive -Path 'dist\extensions\edge-store\*' -DestinationPath 'dist\FirawSelector-Edge.zip'"
 if errorlevel 1 exit /b 1
-powershell -NoProfile -Command "Compress-Archive -Path 'dist\extensions\opera\*' -DestinationPath 'dist\FirawSelector-Opera.zip'"
+powershell -NoProfile -Command "Compress-Archive -Path 'dist\extensions\opera-store\*' -DestinationPath 'dist\FirawSelector-Opera.zip'"
 if errorlevel 1 exit /b 1
 powershell -NoProfile -Command "Compress-Archive -Path 'dist\extensions\firefox\*' -DestinationPath 'dist\FirawSelector-Firefox.zip'"
 if errorlevel 1 exit /b 1

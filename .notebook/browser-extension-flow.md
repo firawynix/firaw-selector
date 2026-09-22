@@ -23,5 +23,15 @@ Instalação: `FirawSelectorSetup.cs:Instalador.Instalar()`
   local; o ID atribuído pela loja ainda precisa ser confirmado.
 
 Build: `build.cmd` → executáveis + quatro ZIPs em `dist/`
+- Store ZIPs for Chrome, Edge, and Opera omit the manifest `key` field.
+  Local extension copies retain it for the existing native-host identity.
+- The Firefox Store manifest uses `FirawSelector` as its display name;
+  Mozilla rejects browser trademarks in an add-on name.
+- `tools/prepare-store-screenshot.ps1` prepares the Chrome listing image
+  and the 64 × 64 Opera icon from existing project artwork.
+- The installer native-host manifest now accepts the local Chromium extension
+  ID and the assigned Chrome, Edge, and Opera store IDs. Firefox keeps its
+  fixed extension ID. Verify the installed store extensions against these IDs
+  before promoting the updated installer to the site or Microsoft Store.
 
 Updated: 2026-09-22
