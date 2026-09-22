@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Web.Script.Serialization;
@@ -23,9 +24,28 @@ sealed class ManifestoAtualizacao
 static class AutoUpdate
 {
     const string Base = "https://jogos.firawynix.com.br/api/games/";
+    const int AppmodelErrorNoPackage = 15700;
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+    static extern int GetCurrentPackageFullName(ref uint tamanho, IntPtr nome);
+
+    static bool EhPacoteWindows()
+    {
+        uint tamanho = 0;
+        try
+        {
+            return GetCurrentPackageFullName(ref tamanho, IntPtr.Zero) != AppmodelErrorNoPackage;
+        }
+        catch (EntryPointNotFoundException)
+        {
+            return false;
+        }
+    }
 
     public static void Verificar(string slug, string versaoAtual)
     {
+        // O MSIX recebe atualizacoes pela Store; nunca baixe o instalador classico nele.
+        if (EhPacoteWindows()) return;
         ThreadPool.QueueUserWorkItem(delegate
         {
             try

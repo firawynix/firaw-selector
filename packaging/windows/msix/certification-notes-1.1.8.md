@@ -1,4 +1,4 @@
-# FirawSelector 1.1.7: Microsoft Store submission notes
+# FirawSelector 1.1.8: Microsoft Store submission notes
 
 These notes describe the **MSIX edition** of FirawSelector. They do not claim
 features that are available only through the classic installer.
@@ -6,18 +6,18 @@ features that are available only through the classic installer.
 ## Package to submit
 
 - Product ID: `9N8MV05X1NVP` (update the existing product, not a new listing).
-- Package: `dist/FirawSelector-1.1.7.0-x86-store.msix`.
+- Package: `dist/FirawSelector-1.1.8.0-x86-store.msix`.
 - Identity: `Firawynix.FirawSelector`.
 - Publisher: `CN=1FDE3668-C222-4506-AFE6-E2E425EAECD8`.
 - Architecture: x86; Windows 10 build 19041 or later, including 64-bit Windows.
 - The Store package is unsigned locally. Microsoft signs it after approval.
-- Do not upload `FirawSelector-1.1.7.0-x86-sideload.msix`: it has a separate
+- Do not upload `FirawSelector-1.1.8.0-x86-sideload.msix`: it has a separate
   laboratory identity and a private test certificate.
 
 On September 22, 2026, the laboratory MSIX signature verified successfully.
-Windows installed it with package status `Ok`, architecture `X86`, and version
-`1.1.7.0`. The package was then removed. This was an installation check, not
-an interactive test of the chooser or Studio.
+Windows installed `1.1.8.0` with architecture `X86` and package status `Ok`.
+The package was then removed. This installation check does not cover
+interactive behavior.
 
 ## What's new
 
@@ -25,7 +25,8 @@ The chooser now puts **Copy link [0]** above the browser list. Pressing `0`
 or numpad `0` copies the current link without opening a browser. In Studio,
 users can hide a configured browser from the visible chooser while retaining
 its numeric shortcut. The package continues to support Windows 10 and 11 on
-x86 and x64 devices.
+x86 and x64 devices. Packaged copies do not run the site's classic-installer
+update checker; Store updates use the Microsoft Store channel.
 
 ## Notes for certification (paste into Partner Center)
 
@@ -45,6 +46,9 @@ HTTPS. Open an HTTP or HTTPS link from another application. The chooser
 appears; choose a browser, press `0` to copy the link, or press `Esc` to
 cancel. In Studio, hide a browser from the visible chooser and verify its
 assigned number still opens it when the chooser appears.
+
+The packaged application uses Store-managed updates. It does not download or
+launch the classic installer on startup.
 
 Browser add-ons are separate, optional products being submitted to their
 respective browser stores. They use local Native Messaging in the classic
