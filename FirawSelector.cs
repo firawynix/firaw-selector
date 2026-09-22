@@ -172,6 +172,7 @@ class Escolha : JanelaFiraw
     void Monta()
     {
         List<Navegador> lista = cfg.Visiveis();
+        List<Navegador> atalhos = cfg.Atalhos();
         bool enxuto = cfg.Compacto;
         fantasma = enxuto && cfg.Fantasma;
         int largura = enxuto ? 400 : 520;
@@ -201,6 +202,9 @@ class Escolha : JanelaFiraw
             y += 26;
         }
 
+        Corpo.Controls.Add(UI.Botao(Idioma.T("esc.copiar"), 16, y, 154, delegate { CopiaLink(); }, false));
+        y += 38;
+
         if (lista.Count == 0)
         {
             Label vazio = new Label();
@@ -216,7 +220,8 @@ class Escolha : JanelaFiraw
         for (int i = 0; i < lista.Count; i++)
         {
             Navegador n = lista[i];
-            ItemNavegador item = new ItemNavegador(n, i + 1, padrao != null && n.Id == padrao.Id, enxuto);
+            ItemNavegador item = new ItemNavegador(n, atalhos.IndexOf(n) + 1,
+                padrao != null && n.Id == padrao.Id, enxuto);
             item.Location = new Point(16, y);
             item.Width = largura - 32;
             item.Click += delegate(object s, EventArgs e)
@@ -293,22 +298,14 @@ class Escolha : JanelaFiraw
         }
         y += 30;
 
-        Corpo.Controls.Add(UI.Botao(Idioma.T("esc.copiar"), 16, y, 110, delegate
-        {
-            try { Clipboard.SetText(url); } catch { }
-            lblConta.ForeColor = C.Bom;
-            lblConta.Text = Idioma.T("esc.copiado");
-            ParaContagem();
-        }, false));
-
-        Corpo.Controls.Add(UI.Botao(Idioma.T("esc.editar"), 132, y, 90, delegate { Edita(); }, false));
+        Corpo.Controls.Add(UI.Botao(Idioma.T("esc.editar"), 16, y, 90, delegate { Edita(); }, false));
 
         Corpo.Controls.Add(UI.Botao(Idioma.T("btn.cancelar"), largura - 32 - 100, y, 100,
             delegate { Resultado = null; Close(); }, false));
 
         lblConta = new Label();
-        lblConta.Location = new Point(232, y + 6);
-        lblConta.Size = new Size(150, 20);
+        lblConta.Location = new Point(116, y + 6);
+        lblConta.Size = new Size(250, 20);
         lblConta.ForeColor = C.Texto3;
         lblConta.TextAlign = ContentAlignment.MiddleCenter;
         Corpo.Controls.Add(lblConta);
@@ -469,6 +466,21 @@ class Escolha : JanelaFiraw
         }
     }
 
+    void CopiaLink()
+    {
+        try
+        {
+            Clipboard.SetText(url);
+            if (lblConta != null)
+            {
+                lblConta.ForeColor = C.Bom;
+                lblConta.Text = Idioma.T("esc.copiado");
+            }
+            ParaContagem();
+        }
+        catch { }
+    }
+
     void Aceita(Navegador n, bool ctrl)
     {
         if (n == null) return;
@@ -482,15 +494,16 @@ class Escolha : JanelaFiraw
 
     void Teclado(object s, KeyEventArgs e)
     {
-        List<Navegador> lista = cfg.Visiveis();
+        List<Navegador> atalhos = cfg.Atalhos();
 
         if (e.KeyCode == Keys.Escape) { Resultado = null; Close(); return; }
         if (e.KeyCode == Keys.Enter) { Aceita(cfg.Padrao, e.Control); return; }
+        if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.NumPad0) { CopiaLink(); return; }
 
         int n = -1;
         if (e.KeyCode >= Keys.D1 && e.KeyCode <= Keys.D9) n = e.KeyCode - Keys.D1;
         if (e.KeyCode >= Keys.NumPad1 && e.KeyCode <= Keys.NumPad9) n = e.KeyCode - Keys.NumPad1;
-        if (n >= 0 && n < lista.Count) { Aceita(lista[n], e.Control); return; }
+        if (n >= 0 && n < atalhos.Count) { Aceita(atalhos[n], e.Control); return; }
 
         ParaContagem();
     }

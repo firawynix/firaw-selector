@@ -81,6 +81,7 @@ class DialogoNavegador : JanelaFiraw
     PictureBox previa;
     ComboBox cmbTipoRegra;
     ListBox lstRegras;
+    CheckBox chkOculto;
     public Navegador Nav;
 
     readonly Cfg cfg;
@@ -163,6 +164,11 @@ class DialogoNavegador : JanelaFiraw
         txtPriv = UI.Campo(16, y, Campo);
         Corpo.Controls.Add(txtPriv);
         y += 36;
+
+        chkOculto = UI.Caixa(Idioma.T("nav.ocultarFlag"), 16, y,
+            existente != null && existente.Oculto);
+        Corpo.Controls.Add(chkOculto);
+        y += 30;
 
         // ---- regras deste navegador ----
         // Aqui e o lugar natural de criar a regra: voce esta olhando para o
@@ -347,6 +353,7 @@ class DialogoNavegador : JanelaFiraw
         Nav.Exe = exe;
         Nav.Args = txtArgs.Text.Trim();
         Nav.ArgsPrivado = txtPriv.Text.Trim();
+        Nav.Oculto = chkOculto.Checked;
         Nav.Familia = Navegador.FamiliaDoExe(exe);
         Nav.IconeArquivo = ValorIcone();
         Nav.EsqueceIcone();   // sem isto a lista continuaria mostrando o antigo

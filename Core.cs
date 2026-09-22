@@ -381,11 +381,11 @@ static class Idioma
 
         // -------- janela de escolha --------
         A("esc.titulo", "Abrir link com", "Open link with");
-        A("esc.dica", "1-9 escolhe · Enter usa o padrão · Esc cancela · Ctrl abre privativo",
-                      "1-9 to pick · Enter for default · Esc cancels · Ctrl for private");
+        A("esc.dica", "0 copia · 1-9 abre · Ctrl privativo · Enter padrão · Esc sai",
+                      "0 copies · 1-9 opens · Ctrl private · Enter default · Esc closes");
         A("esc.lembrar", "Sempre usar este navegador para {0}", "Always use this browser for {0}");
         A("esc.privativo", "Janela privativa", "Private window");
-        A("esc.copiar", "Copiar link", "Copy link");
+        A("esc.copiar", "Copiar link  [0]", "Copy link  [0]");
         A("esc.editar", "Editar", "Edit");
         A("esc.auto", "Abrindo em {0}s", "Opening in {0}s");
         A("esc.vazio", "Nenhum navegador encontrado. Abra o FirawSelector Studio.",
@@ -414,6 +414,8 @@ static class Idioma
         A("nav.definirPadrao", "Definir como padrão", "Set as default");
         A("nav.definirSegundo", "Definir como segundo", "Set as second");
         A("nav.ocultar", "Ocultar / mostrar", "Hide / show");
+        A("nav.ocultarFlag", "Ocultar na lista (atalho 1-9 continua ativo)",
+                              "Hide from list (1-9 shortcut stays active)");
         A("nav.abrirTeste", "Abrir um link de teste", "Open a test link");
         A("nav.nome", "Nome", "Name");
         A("nav.caminho", "Programa (.exe)", "Program (.exe)");

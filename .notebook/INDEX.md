@@ -1,7 +1,7 @@
 # .notebook
 > Project intelligence — read before every mission
 
-Last updated: 2026-09-15
+Last updated: 2026-09-22
 
 - [msix-packaging](msix-packaging.md) — Store and lab package identities and trust boundary | setup | msix, store, signing
 

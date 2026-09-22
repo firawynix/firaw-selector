@@ -588,6 +588,14 @@ class Cfg
         return v;
     }
 
+    public List<Navegador> Atalhos()
+    {
+        List<Navegador> v = new List<Navegador>();
+        foreach (Navegador n in Navegadores)
+            if (n.Existe) v.Add(n);
+        return v;
+    }
+
     /// <summary>Primeira carga: acha os navegadores e escolhe um padrao sozinho.</summary>
     public void Semear()
     {
