@@ -15,14 +15,16 @@
 - `packaging/windows/msix/certification-notes-1.1.8.md` documents the Store
   update and its feature boundary: MSIX omits the Native Messaging host.
 - 2026-09-22: `1.1.8.0` Store and Lab packages built. Lab signature verified;
-  Lab installed (`Ok`, x86) and removed. Interactive behavior and Store
-  submission remain unverified.
+  Lab installed (`Ok`, x86) and removed. Interactive behavior remains
+  unverified; package validation and Store submission are confirmed.
 - `AutoUpdate.cs:AutoUpdate.Verificar()` skips the classic installer updater
   when `GetCurrentPackageFullName` reports package identity. Site EXE updater
   stays active.
 - 2026-09-22: Partner Center account switched to Firawynix; Apps and Games
   workspace is available. Existing Store package is `1.1.5.0` x86 and the
-  product is published. Draft Submission 2 has the superseded `1.1.7.0`
-  package; replace it with `1.1.8.0` before certification.
+  product remains published. Submission 2 (`1152921505701954828`) has the
+  validated `1.1.8.0` package and was sent for certification. Partner Center
+  showed "Na certificação", step 2/4 (pre-processing). The superseded draft
+  package `1.1.7.0` was removed from the submission.
 
 Updated: 2026-09-22
