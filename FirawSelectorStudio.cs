@@ -1349,6 +1349,7 @@ class Studio : JanelaFiraw
     {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
+        AutoUpdate.Verificar("firawselector", Amb.Versao);
         string aba = "navegadores";
         foreach (string a in args)
         {

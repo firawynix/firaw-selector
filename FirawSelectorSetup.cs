@@ -283,6 +283,7 @@ class Instalador : JanelaFiraw
         string motor = Path.Combine(local, Amb.Produto + ".exe");
         string studio = Path.Combine(local, Amb.Produto + " Studio.exe");
         string host = Path.Combine(local, Amb.Produto + " Host.exe");
+        string atualizador = Path.Combine(local, "FirawAutoUpdate.exe");
         string desinst = Path.Combine(local, "Desinstalar.exe");
 
         status(Idioma.T("inst.copiando"));
@@ -292,6 +293,7 @@ class Instalador : JanelaFiraw
             Extrai(Amb.Produto + ".exe", motor);
             Extrai(Amb.Produto + " Studio.exe", studio);
             Extrai(Amb.Produto + " Host.exe", host);
+            Extrai("FirawAutoUpdate.exe", atualizador);
             ExtraiExtensao(local, "Chrome", "ext.chrome.manifest.json");
             ExtraiExtensao(local, "Edge", "ext.edge.manifest.json");
             ExtraiExtensao(local, "Firefox", "ext.firefox.manifest.json");

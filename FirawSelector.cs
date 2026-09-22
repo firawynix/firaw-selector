@@ -540,6 +540,7 @@ static class Programa
     {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
+        AutoUpdate.Verificar("firawselector", Amb.Versao);
 
         List<string> enderecos = new List<string>();
         bool registrar = false, remover = false, config = false;
