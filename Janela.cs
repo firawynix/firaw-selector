@@ -2,7 +2,93 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
+
+// ---------------------------------------------------------------------------
+// Cursores animados do tema azul. Sao carregados de arquivos .ani para que o
+// Windows preserve a animacao; se algum arquivo faltar, o controle cai no
+// cursor equivalente do sistema sem impedir a abertura do programa.
+// ---------------------------------------------------------------------------
+static class CursoresFiraw
+{
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    static extern IntPtr LoadCursorFromFile(string nomeArquivo);
+
+    static string Pasta
+    {
+        get
+        {
+            string instalada = Path.Combine(Amb.PastaExe, "Cursores", "Marioa");
+            if (Directory.Exists(instalada)) return instalada;
+            return Path.Combine(Amb.PastaExe, "assets", "cursors", "marioa");
+        }
+    }
+
+    static Cursor Carrega(string nome, Cursor reserva)
+    {
+        try
+        {
+            string caminho = Path.Combine(Pasta, nome);
+            if (!File.Exists(caminho)) return reserva;
+            IntPtr handle = LoadCursorFromFile(caminho);
+            return handle != IntPtr.Zero ? new Cursor(handle) : reserva;
+        }
+        catch { return reserva; }
+    }
+
+    public static readonly Cursor Normal = Carrega("normal.ani", Cursors.Default);
+    public static readonly Cursor Ajuda = Carrega("help.ani", Cursors.Help);
+    public static readonly Cursor SegundoPlano = Carrega("background.ani", Cursors.AppStarting);
+    public static readonly Cursor Ocupado = Carrega("busy.ani", Cursors.WaitCursor);
+    public static readonly Cursor Precisao = Carrega("precision.ani", Cursors.Cross);
+    public static readonly Cursor Texto = Carrega("text.ani", Cursors.IBeam);
+    public static readonly Cursor Alternativo = Carrega("alternate.ani", Cursors.UpArrow);
+    public static readonly Cursor Indisponivel = Carrega("unavailable.ani", Cursors.No);
+    public static readonly Cursor Vertical = Carrega("resize-vertical.ani", Cursors.SizeNS);
+    public static readonly Cursor Horizontal = Carrega("resize-horizontal.ani", Cursors.SizeWE);
+    public static readonly Cursor Diagonal1 = Carrega("resize-diagonal-1.ani", Cursors.SizeNWSE);
+    public static readonly Cursor Diagonal2 = Carrega("resize-diagonal-2.ani", Cursors.SizeNESW);
+    public static readonly Cursor Mover = Carrega("move.ani", Cursors.SizeAll);
+    public static readonly Cursor Link = Carrega("link.ani", Cursors.Hand);
+
+    public static Cursor DoRedimensionamento(int hit)
+    {
+        if (hit == 10 || hit == 11) return Horizontal;
+        if (hit == 12 || hit == 15) return Vertical;
+        if (hit == 13 || hit == 17) return Diagonal1;
+        if (hit == 14 || hit == 16) return Diagonal2;
+        return null;
+    }
+
+    public static void Aplicar(Control raiz)
+    {
+        if (raiz is TextBoxBase || raiz.Cursor == Cursors.IBeam) raiz.Cursor = Texto;
+        else if (raiz.Cursor == Cursors.Hand) raiz.Cursor = Link;
+        else if (raiz.Cursor == Cursors.Help) raiz.Cursor = Ajuda;
+        else if (raiz.Cursor == Cursors.Cross) raiz.Cursor = Precisao;
+        else if (raiz.Cursor == Cursors.UpArrow) raiz.Cursor = Alternativo;
+        else if (raiz.Cursor == Cursors.AppStarting) raiz.Cursor = SegundoPlano;
+        else if (raiz.Cursor == Cursors.WaitCursor) raiz.Cursor = Ocupado;
+        else if (raiz.Cursor == Cursors.No) raiz.Cursor = Indisponivel;
+        else if (raiz.Cursor == Cursors.SizeNS) raiz.Cursor = Vertical;
+        else if (raiz.Cursor == Cursors.SizeWE) raiz.Cursor = Horizontal;
+        else if (raiz.Cursor == Cursors.SizeNWSE) raiz.Cursor = Diagonal1;
+        else if (raiz.Cursor == Cursors.SizeNESW) raiz.Cursor = Diagonal2;
+        else if (raiz.Cursor == Cursors.SizeAll) raiz.Cursor = Mover;
+        else if (raiz.Cursor == Cursors.Default || raiz.Cursor == Cursors.Arrow) raiz.Cursor = Normal;
+
+        raiz.ControlAdded -= ControleAdicionado;
+        raiz.ControlAdded += ControleAdicionado;
+        foreach (Control filho in raiz.Controls) Aplicar(filho);
+    }
+
+    static void ControleAdicionado(object remetente, ControlEventArgs e)
+    {
+        Aplicar(e.Control);
+    }
+}
 
 // ---------------------------------------------------------------------------
 // Botao da barra de titulo. Minimizar, maximizar e fechar sao desenhados por
@@ -41,7 +127,7 @@ class BotaoBarra : Label
         ForeColor = normalTexto;
         BackColor = Color.Transparent;
         Dock = DockStyle.Right;
-        Cursor = Cursors.Default;
+        Cursor = CursoresFiraw.Normal;
 
         MouseEnter += delegate { dentro = true; Pinta(); };
         MouseLeave += delegate { dentro = false; Pinta(); };
@@ -95,6 +181,7 @@ class JanelaFiraw : Form
         Font = new Font("Segoe UI", 9f);
         KeyPreview = true;
         DoubleBuffered = true;
+        Cursor = CursoresFiraw.Normal;
         try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); }
         catch { }
 
@@ -106,6 +193,7 @@ class JanelaFiraw : Form
         Barra.Dock = DockStyle.Top;
         Barra.Height = 38;
         Barra.BackColor = C.Painel;
+        Barra.Cursor = CursoresFiraw.Mover;
         Barra.Paint += PintaBarra;
         Barra.MouseDown += Arrasta;
         Barra.MouseDoubleClick += AlternaMax;
@@ -114,6 +202,7 @@ class JanelaFiraw : Form
         marca.Size = new Size(18, 18);
         marca.Location = new Point(13, 10);
         marca.SizeMode = PictureBoxSizeMode.Zoom;
+        marca.Cursor = CursoresFiraw.Mover;
         try { if (Icon != null) marca.Image = Icon.ToBitmap(); }
         catch { }
         marca.MouseDown += Arrasta;
@@ -126,6 +215,7 @@ class JanelaFiraw : Form
         lblTitulo.ForeColor = C.Texto;
         lblTitulo.Font = new Font("Segoe UI Semibold", 9f, FontStyle.Bold);
         lblTitulo.BackColor = Color.Transparent;
+        lblTitulo.Cursor = CursoresFiraw.Mover;
         lblTitulo.MouseDown += Arrasta;
         lblTitulo.MouseDoubleClick += AlternaMax;
         Barra.Controls.Add(lblTitulo);
@@ -163,6 +253,13 @@ class JanelaFiraw : Form
         base.OnHandleCreated(e);
         if (C.Escuro) Amb.BarraEscura(Handle);
         Amb.BordaColorida(Handle, C.Acento);
+    }
+
+    protected override void OnShown(EventArgs e)
+    {
+        base.OnShown(e);
+        CursoresFiraw.Aplicar(this);
+        Barra.Cursor = CursoresFiraw.Mover;
     }
 
     void PintaBarra(object s, PaintEventArgs e)
@@ -208,6 +305,19 @@ class JanelaFiraw : Form
 
     protected override void WndProc(ref Message m)
     {
+        if (m.Msg == Amb.WM_SETCURSOR && podeRedimensionar &&
+            WindowState == FormWindowState.Normal)
+        {
+            int hit = (int)(m.LParam.ToInt64() & 0xFFFF);
+            Cursor cursor = CursoresFiraw.DoRedimensionamento(hit);
+            if (cursor != null)
+            {
+                Cursor.Current = cursor;
+                m.Result = (IntPtr)1;
+                return;
+            }
+        }
+
         if (m.Msg == Amb.WM_NCHITTEST && podeRedimensionar &&
             WindowState == FormWindowState.Normal)
         {

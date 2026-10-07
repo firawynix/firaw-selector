@@ -78,6 +78,11 @@ foreach ($file in @(
     Copy-Item -LiteralPath (Join-Path $projectRoot $file) -Destination $stage
 }
 
+$cursorDestination = Join-Path $stage 'Cursores\Marioa'
+New-Item -ItemType Directory -Path $cursorDestination -Force | Out-Null
+Copy-Item -Path (Join-Path $projectRoot 'assets\cursors\marioa\*.ani') `
+    -Destination $cursorDestination
+
 $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 if (-not (Test-Path -LiteralPath $csc)) {
     $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework\v4.0.30319\csc.exe'

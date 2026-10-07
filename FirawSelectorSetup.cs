@@ -211,6 +211,19 @@ class Instalador : JanelaFiraw
             Extrai("ext.icon" + tamanho + ".png", Path.Combine(pasta, "icon" + tamanho + ".png"));
     }
 
+    static void ExtraiCursores(string local)
+    {
+        string pasta = Path.Combine(local, "Cursores", "Marioa");
+        Directory.CreateDirectory(pasta);
+        foreach (string nome in new string[] {
+            "normal.ani", "help.ani", "background.ani", "busy.ani",
+            "precision.ani", "text.ani", "handwriting.ani",
+            "unavailable.ani", "resize-vertical.ani", "resize-horizontal.ani",
+            "resize-diagonal-1.ani", "resize-diagonal-2.ani", "move.ani",
+            "alternate.ani", "link.ani", "location.ani", "person.ani" })
+            Extrai("cursor." + nome, Path.Combine(pasta, nome));
+    }
+
     static string Json(string valor)
     {
         return valor.Replace("\\", "\\\\").Replace("\"", "\\\"");
@@ -302,6 +315,7 @@ class Instalador : JanelaFiraw
             Extrai(Amb.Produto + " Studio.exe", studio);
             Extrai(Amb.Produto + " Host.exe", host);
             Extrai("FirawAutoUpdate.exe", atualizador);
+            ExtraiCursores(local);
             ExtraiExtensao(local, "Chrome", "ext.chrome.manifest.json");
             ExtraiExtensao(local, "Edge", "ext.edge.manifest.json");
             ExtraiExtensao(local, "Opera", "ext.opera.manifest.json");
