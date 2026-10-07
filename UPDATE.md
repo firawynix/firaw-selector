@@ -1,3 +1,13 @@
+# FirawSelector 1.1.9 — navegador escolhido em primeiro plano
+
+- Após a escolha, o FirawSelector tenta trazer para a frente a janela do
+  navegador que recebeu o link, inclusive quando ele já estava aberto.
+- A mesma correção vale para links encaminhados por regras e pelas extensões.
+- O Windows ainda pode negar a mudança de foco em situações específicas; o
+  link continua abrindo mesmo nesse caso.
+
+---
+
 # FirawSelector 1.1.5 — MSIX compatível com a Microsoft Store
 
 - O pacote MSIX não solicita mais a capacidade restrita

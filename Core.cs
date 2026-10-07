@@ -17,7 +17,7 @@ static class Amb
 {
     public const string Produto = "FirawSelector";
     public const string Marca = "Firawynix";
-    public const string Versao = "1.1.8";
+    public const string Versao = "1.1.9";
     public const string Site = "https://firawselector.firawynix.com.br";
     public const string Repo = "https://github.com/firawynix/firaw-selector";
 
@@ -51,6 +51,39 @@ static class Amb
     [DllImport("user32.dll")]
     public static extern bool SetForegroundWindow(IntPtr hwnd);
 
+    delegate bool EnumerarJanela(IntPtr hwnd, IntPtr parametro);
+
+    [DllImport("user32.dll")]
+    static extern bool EnumWindows(EnumerarJanela callback, IntPtr parametro);
+
+    [DllImport("user32.dll")]
+    static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processo);
+
+    [DllImport("user32.dll")]
+    static extern bool IsWindowVisible(IntPtr hwnd);
+
+    [DllImport("user32.dll")]
+    static extern bool IsIconic(IntPtr hwnd);
+
+    [DllImport("user32.dll")]
+    static extern bool ShowWindowAsync(IntPtr hwnd, int comando);
+
+    [DllImport("user32.dll")]
+    static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    static extern IntPtr GetWindow(IntPtr hwnd, uint comando);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    static extern IntPtr OpenProcess(uint acesso, bool herdar, uint processo);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    static extern bool QueryFullProcessImageName(IntPtr processo, int flags,
+        StringBuilder caminho, ref int tamanho);
+
+    [DllImport("kernel32.dll")]
+    static extern bool CloseHandle(IntPtr handle);
+
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     public static extern int PrivateExtractIcons(string file, int index, int cx, int cy,
         IntPtr[] icons, int[] ids, int count, int flags);
@@ -67,6 +100,80 @@ static class Amb
     public const int EM_REDO = 0x454;
     public const int HTCAPTION = 2;
     public const int VK_SHIFT = 0x10;
+
+    static bool MesmoPrograma(uint pid, string exe)
+    {
+        const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
+        IntPtr processo = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid);
+        if (processo == IntPtr.Zero) return false;
+        try
+        {
+            StringBuilder caminho = new StringBuilder(32768);
+            int tamanho = caminho.Capacity;
+            return QueryFullProcessImageName(processo, 0, caminho, ref tamanho) &&
+                string.Equals(caminho.ToString(), exe, StringComparison.OrdinalIgnoreCase);
+        }
+        finally { CloseHandle(processo); }
+    }
+
+    /// <summary>Janelas visíveis do executável escolhido, em ordem de frente para trás.</summary>
+    public static List<IntPtr> JanelasDoPrograma(string exe)
+    {
+        List<IntPtr> janelas = new List<IntPtr>();
+        try
+        {
+            Dictionary<uint, bool> processos = new Dictionary<uint, bool>();
+            EnumWindows(delegate(IntPtr hwnd, IntPtr parametro)
+            {
+                if (!IsWindowVisible(hwnd) || GetWindow(hwnd, 4) != IntPtr.Zero) return true;
+                uint pid;
+                GetWindowThreadProcessId(hwnd, out pid);
+                bool corresponde;
+                if (!processos.TryGetValue(pid, out corresponde))
+                {
+                    corresponde = pid != 0 && MesmoPrograma(pid, exe);
+                    processos[pid] = corresponde;
+                }
+                if (corresponde) janelas.Add(hwnd);
+                return true;
+            }, IntPtr.Zero);
+        }
+        catch { } // Falhar ao achar a janela nunca deve impedir a abertura do link.
+        return janelas;
+    }
+
+    /// <summary>
+    /// O navegador existente pode receber a nova aba sem vir para frente. Dá
+    /// preferência a uma janela recém-criada; senão, ativa a janela visível
+    /// mais à frente do executável escolhido. O Windows pode negar o foco.
+    /// </summary>
+    public static void TrazerProgramaParaFrente(string exe, HashSet<IntPtr> anteriores)
+    {
+        try
+        {
+            System.Diagnostics.Stopwatch tempo = System.Diagnostics.Stopwatch.StartNew();
+            IntPtr candidato = IntPtr.Zero;
+            while (tempo.ElapsedMilliseconds < 1500)
+            {
+                List<IntPtr> atuais = JanelasDoPrograma(exe);
+                IntPtr frente = GetForegroundWindow();
+                foreach (IntPtr janela in atuais)
+                {
+                    if (!anteriores.Contains(janela)) { candidato = janela; break; }
+                    if (candidato == IntPtr.Zero) candidato = janela;
+                }
+                if (candidato != IntPtr.Zero && !anteriores.Contains(candidato))
+                    break;
+                if (tempo.ElapsedMilliseconds >= 250 && atuais.Contains(frente)) return;
+                if (candidato != IntPtr.Zero && tempo.ElapsedMilliseconds >= 250) break;
+                System.Threading.Thread.Sleep(50);
+            }
+            if (candidato == IntPtr.Zero) return;
+            if (IsIconic(candidato)) ShowWindowAsync(candidato, 9); // SW_RESTORE
+            SetForegroundWindow(candidato);
+        }
+        catch { } // O link já foi aberto; falha ao ativar é apenas visual.
+    }
 
     public static bool EmPacoteMSIX()
     {
