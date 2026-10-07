@@ -16,6 +16,7 @@ rem /codepage:65001 - os textos em portugues sao UTF-8; sem isso o csc le pela
 rem pagina de codigo do sistema e os acentos chegam trocados na tela.
 set OPTS=/nologo /target:winexe /platform:anycpu /codepage:65001 /optimize+
 set COMUM=Core.cs Modelo.cs Janela.cs AutoUpdate.cs
+set CURSORES=/resource:"assets\cursors\marioa\normal.ani",cursor.normal.ani /resource:"assets\cursors\marioa\help.ani",cursor.help.ani /resource:"assets\cursors\marioa\background.ani",cursor.background.ani /resource:"assets\cursors\marioa\busy.ani",cursor.busy.ani /resource:"assets\cursors\marioa\precision.ani",cursor.precision.ani /resource:"assets\cursors\marioa\text.ani",cursor.text.ani /resource:"assets\cursors\marioa\handwriting.ani",cursor.handwriting.ani /resource:"assets\cursors\marioa\unavailable.ani",cursor.unavailable.ani /resource:"assets\cursors\marioa\resize-vertical.ani",cursor.resize-vertical.ani /resource:"assets\cursors\marioa\resize-horizontal.ani",cursor.resize-horizontal.ani /resource:"assets\cursors\marioa\resize-diagonal-1.ani",cursor.resize-diagonal-1.ani /resource:"assets\cursors\marioa\resize-diagonal-2.ani",cursor.resize-diagonal-2.ani /resource:"assets\cursors\marioa\move.ani",cursor.move.ani /resource:"assets\cursors\marioa\alternate.ani",cursor.alternate.ani /resource:"assets\cursors\marioa\link.ani",cursor.link.ani /resource:"assets\cursors\marioa\location.ani",cursor.location.ani /resource:"assets\cursors\marioa\person.ani",cursor.person.ani
 
 cd /d "%~dp0"
 
@@ -69,7 +70,7 @@ call :sign "FirawSelector Studio.exe"
 if errorlevel 1 exit /b 1
 
 echo [4/5] instalador...
-"%CSC%" %OPTS% %REFS% /win32icon:"firawselector.ico" /resource:"FirawSelector.exe" /resource:"FirawSelector Studio.exe" /resource:"FirawSelector Host.exe" /resource:"FirawAutoUpdate.exe" /resource:"extensions\chrome\manifest.json",ext.chrome.manifest.json /resource:"extensions\edge\manifest.json",ext.edge.manifest.json /resource:"extensions\opera\manifest.json",ext.opera.manifest.json /resource:"extensions\firefox\manifest.json",ext.firefox.manifest.json /resource:"extensions\shared\background.js",ext.background.js /resource:"extensions\shared\content.js",ext.content.js /resource:"extensions\shared\icon16.png",ext.icon16.png /resource:"extensions\shared\icon32.png",ext.icon32.png /resource:"extensions\shared\icon48.png",ext.icon48.png /resource:"extensions\shared\icon128.png",ext.icon128.png /out:"FirawSelector Setup.exe" FirawSelectorSetup.cs %COMUM%
+"%CSC%" %OPTS% %REFS% /win32icon:"firawselector.ico" /resource:"FirawSelector.exe" /resource:"FirawSelector Studio.exe" /resource:"FirawSelector Host.exe" /resource:"FirawAutoUpdate.exe" /resource:"extensions\chrome\manifest.json",ext.chrome.manifest.json /resource:"extensions\edge\manifest.json",ext.edge.manifest.json /resource:"extensions\opera\manifest.json",ext.opera.manifest.json /resource:"extensions\firefox\manifest.json",ext.firefox.manifest.json /resource:"extensions\shared\background.js",ext.background.js /resource:"extensions\shared\content.js",ext.content.js /resource:"extensions\shared\icon16.png",ext.icon16.png /resource:"extensions\shared\icon32.png",ext.icon32.png /resource:"extensions\shared\icon48.png",ext.icon48.png /resource:"extensions\shared\icon128.png",ext.icon128.png %CURSORES% /out:"FirawSelector Setup.exe" FirawSelectorSetup.cs %COMUM%
 if errorlevel 1 exit /b 1
 call :sign "FirawSelector Setup.exe"
 if errorlevel 1 exit /b 1
@@ -82,6 +83,10 @@ copy /y "FirawSelector Studio.exe" "dist\FirawSelector-Studio.exe" >nul
 copy /y "FirawSelector Setup.exe" "dist\FirawSelector-Setup.exe" >nul
 copy /y "FirawAutoUpdate.exe" "dist\FirawAutoUpdate.exe" >nul
 copy /y "UPDATE.md" "dist\UPDATE.md" >nul
+
+if exist "dist\Cursores" rmdir /s /q "dist\Cursores"
+mkdir "dist\Cursores\Marioa"
+copy /y "assets\cursors\marioa\*.ani" "dist\Cursores\Marioa\" >nul
 
 if exist "dist\extensions" rmdir /s /q "dist\extensions"
 for %%b in (chrome edge opera firefox) do (

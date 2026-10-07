@@ -1,10 +1,35 @@
-# FirawSelector 1.1.9 — navegador escolhido em primeiro plano
+# FirawSelector 1.1.11 — navegador escolhido em primeiro plano
 
-- Após a escolha, o FirawSelector tenta trazer para a frente a janela do
-  navegador que recebeu o link, inclusive quando ele já estava aberto.
-- A mesma correção vale para links encaminhados por regras e pelas extensões.
-- O Windows ainda pode negar a mudança de foco em situações específicas; o
-  link continua abrindo mesmo nesse caso.
+- Depois da escolha, o navegador que recebeu o link é trazido para a frente
+  quando o Windows permite, inclusive se já estava aberto.
+- O link ainda abre normalmente quando o Windows bloqueia a mudança de foco.
+- Mantém os cursores Marioa e as demais funções da versão 1.1.10.
+
+---
+
+# FirawSelector 1.1.10 — cursores Marioa no Center
+
+- O seletor e o Studio usam os cursores de `C:\Nova pasta\marioa`, incluindo
+  a seleção normal Mario, sem alterar o esquema global do Windows.
+- Os 17 arquivos `.ani` vão no instalador e em `Cursores\Marioa`; controles sem
+  cursor específico continuam com o fallback do Windows.
+- O botão **Copiar link [0]** e o atalho `0` já existiam no código, mas não
+  estavam na versão 1.1.7 publicada no Center. Esta versão os leva ao Center.
+
+---
+
+# FirawSelector 1.1.9 — ponteiros animados personalizados
+
+- As janelas do seletor e do Studio agora usam o conjunto azul de cursores
+  animados fornecido em `C:\Nova pasta\Recriados\Azul`.
+- Foram personalizados seleção normal, links, texto, trabalho em segundo plano,
+  ocupado, indisponível, movimento e os quatro sentidos de redimensionamento.
+- A personalização vale somente dentro do FirawSelector; os ponteiros globais
+  do Windows não são alterados.
+- Se um arquivo de cursor estiver ausente ou inválido, o aplicativo usa o
+  cursor padrão equivalente do Windows.
+- O instalador clássico e os pacotes MSIX incluem automaticamente o tema em
+  `Cursores\Azul`.
 
 ---
 

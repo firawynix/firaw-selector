@@ -37,6 +37,7 @@ O Windows só aceita **um** navegador padrão. Mas o dia a dia não é assim:
 | **Modo enxuto** | Só ícone (grande), nome e número — sem endereço, sem caixas, sem botões |
 | **Sem moldura** | No modo enxuto, só os navegadores flutuando: fundo, barra de título e botões voltam quando o mouse chega, junto com **Configurações** e **Modo completo** |
 | **Troca rápida de modo** | Use **Modo completo** na janela compacta ou **Modo compacto** na janela completa; o seletor reabre o mesmo link e salva a escolha |
+| **Ponteiros personalizados** | Tema Marioa com 17 cursores `.ani` no seletor e no Studio, sem alterar os ponteiros do Windows |
 | **Ícone por navegador** | Troque por um `.ico`, ou pelo ícone nº _n_ de dentro de um `.exe`/`.dll` |
 | **Ordem da lista** | Subir/Descer: quem está em primeiro é o `1` na janela de escolha |
 | **Importar / exportar** | Leva a configuração inteira para outra máquina em um `.ini` |
@@ -49,7 +50,7 @@ O Windows só aceita **um** navegador padrão. Mas o dia a dia não é assim:
 | **Expandir encurtados** | Segue o redirecionamento (HEAD, 5 saltos, 2,5 s) e decide pelo destino real |
 | **Capturar `microsoft-edge:`** | Assume o protocolo que a Pesquisa e os widgets usam para furar o padrão |
 | **Links dentro do navegador** | Extensões para Chrome, Edge, Opera e Firefox chamam a mesma janela de escolha em cada clique |
-| **Editar / copiar o link** | Antes de abrir, na própria janela de escolha |
+| **Editar / copiar o link** | Antes de abrir, na própria janela de escolha; botão **Copiar link [0]** ou tecla `0` |
 | **Atalhos de edição** | Todos os campos aceitam `Ctrl+A`, `Ctrl+C`, `Ctrl+X`, `Ctrl+V`, `Ctrl+Z` e `Ctrl+Y` |
 | **Registro em arquivo** | Endereço, navegador e o **motivo** da decisão |
 | **Português e inglês** | Troca na hora, ou segue o Windows |
