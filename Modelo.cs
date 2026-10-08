@@ -94,9 +94,9 @@ class Navegador
             new System.Diagnostics.ProcessStartInfo(Exe, linha);
         psi.UseShellExecute = true;
         psi.WorkingDirectory = Path.GetDirectoryName(Exe);
-        HashSet<IntPtr> janelasAnteriores = new HashSet<IntPtr>(Amb.JanelasDoPrograma(Exe));
+        HashSet<IntPtr> janelasAnteriores = new HashSet<IntPtr>(Amb.JanelasDoPrograma(Exe, Args));
         System.Diagnostics.Process.Start(psi);
-        Amb.TrazerProgramaParaFrente(Exe, janelasAnteriores);
+        Amb.TrazerProgramaParaFrente(Exe, Args, janelasAnteriores);
     }
 
     public override string ToString() { return Nome; }

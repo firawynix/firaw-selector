@@ -1,3 +1,13 @@
+# FirawSelector 1.1.12 — foco no perfil Opera GX correto
+
+- Ao abrir um link em um perfil lateral do Opera GX, o Selector identifica a
+  janela pelo argumento `--side-profile-name`, além do executável.
+- Uma janela de outro perfil Opera não é trazida para a frente por engano.
+- Se o Windows não permitir identificar o perfil ou conceder foco, o link ainda
+  abre normalmente; o Selector não ativa uma janela diferente como fallback.
+
+---
+
 # FirawSelector 1.1.11 — navegador escolhido em primeiro plano
 
 - Depois da escolha, o navegador que recebeu o link é trazido para a frente

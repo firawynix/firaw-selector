@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.IO;
+using System.Management;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -17,7 +18,7 @@ static class Amb
 {
     public const string Produto = "FirawSelector";
     public const string Marca = "Firawynix";
-    public const string Versao = "1.1.11";
+    public const string Versao = "1.1.12";
     public const string Site = "https://firawselector.firawynix.com.br";
     public const string Repo = "https://github.com/firawynix/firaw-selector";
 
@@ -117,12 +118,46 @@ static class Amb
         finally { CloseHandle(processo); }
     }
 
-    /// <summary>Janelas visíveis do executável escolhido, em ordem de frente para trás.</summary>
-    public static List<IntPtr> JanelasDoPrograma(string exe)
+    static string PerfilOpera(string argumentos)
+    {
+        Match perfil = Regex.Match(argumentos ?? "",
+            @"(?:^|\s)--side-profile-name=(?:""([^""]+)""|([^\s""]+))",
+            RegexOptions.IgnoreCase);
+        return perfil.Success ? (perfil.Groups[1].Success ? perfil.Groups[1].Value : perfil.Groups[2].Value) : "";
+    }
+
+    static Dictionary<uint, string> PerfisOperaEmExecucao()
+    {
+        Dictionary<uint, string> perfis = new Dictionary<uint, string>();
+        using (ManagementObjectSearcher busca = new ManagementObjectSearcher(
+            "SELECT ProcessId, CommandLine FROM Win32_Process WHERE Name='opera.exe'"))
+        using (ManagementObjectCollection processos = busca.Get())
+        {
+            foreach (ManagementObject processo in processos)
+            {
+                using (processo)
+                {
+                    if (processo["CommandLine"] == null) continue;
+                    perfis[Convert.ToUInt32(processo["ProcessId"])] =
+                        PerfilOpera(processo["CommandLine"].ToString());
+                }
+            }
+        }
+        return perfis;
+    }
+
+    /// <summary>Janelas visíveis do executável e, no Opera GX, do perfil escolhido.</summary>
+    public static List<IntPtr> JanelasDoPrograma(string exe, string argumentos)
     {
         List<IntPtr> janelas = new List<IntPtr>();
         try
         {
+            bool opera = string.Equals(Path.GetFileName(exe), "opera.exe",
+                StringComparison.OrdinalIgnoreCase);
+            string perfilEscolhido = opera ? PerfilOpera(argumentos) : "";
+            // Sem a linha de comando não há como distinguir perfis Opera com o
+            // mesmo .exe. Nesse caso, não ativar uma janela de outro perfil.
+            Dictionary<uint, string> perfis = opera ? PerfisOperaEmExecucao() : null;
             Dictionary<uint, bool> processos = new Dictionary<uint, bool>();
             EnumWindows(delegate(IntPtr hwnd, IntPtr parametro)
             {
@@ -133,6 +168,13 @@ static class Amb
                 if (!processos.TryGetValue(pid, out corresponde))
                 {
                     corresponde = pid != 0 && MesmoPrograma(pid, exe);
+                    if (corresponde && opera)
+                    {
+                        string perfilDoProcesso;
+                        corresponde = perfis.TryGetValue(pid, out perfilDoProcesso) &&
+                            string.Equals(perfilDoProcesso, perfilEscolhido,
+                                StringComparison.OrdinalIgnoreCase);
+                    }
                     processos[pid] = corresponde;
                 }
                 if (corresponde) janelas.Add(hwnd);
@@ -146,9 +188,10 @@ static class Amb
     /// <summary>
     /// O navegador existente pode receber a nova aba sem vir para frente. Dá
     /// preferência a uma janela recém-criada; senão, ativa a janela visível
-    /// mais à frente do executável escolhido. O Windows pode negar o foco.
+    /// mais à frente do perfil escolhido. O Windows pode negar o foco.
     /// </summary>
-    public static void TrazerProgramaParaFrente(string exe, HashSet<IntPtr> anteriores)
+    public static void TrazerProgramaParaFrente(string exe, string argumentos,
+        HashSet<IntPtr> anteriores)
     {
         try
         {
@@ -156,7 +199,7 @@ static class Amb
             IntPtr candidato = IntPtr.Zero;
             while (tempo.ElapsedMilliseconds < 1500)
             {
-                List<IntPtr> atuais = JanelasDoPrograma(exe);
+                List<IntPtr> atuais = JanelasDoPrograma(exe, argumentos);
                 IntPtr frente = GetForegroundWindow();
                 foreach (IntPtr janela in atuais)
                 {
