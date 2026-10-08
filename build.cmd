@@ -11,7 +11,7 @@ if not exist "%CSC%" (
     exit /b 1
 )
 
-set REFS=/r:System.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll /r:System.Web.Extensions.dll
+set REFS=/r:System.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll /r:System.Web.Extensions.dll /r:System.Management.dll
 rem /codepage:65001 - os textos em portugues sao UTF-8; sem isso o csc le pela
 rem pagina de codigo do sistema e os acentos chegam trocados na tela.
 set OPTS=/nologo /target:winexe /platform:anycpu /codepage:65001 /optimize+
@@ -58,7 +58,7 @@ call :sign "FirawSelector.exe"
 if errorlevel 1 exit /b 1
 
 echo [2/5] ponte das extensoes...
-"%CSC%" /nologo /target:exe /platform:anycpu /codepage:65001 /optimize+ /win32icon:"firawselector.ico" /r:System.dll /r:System.Web.Extensions.dll /out:"FirawSelector Host.exe" FirawSelectorHost.cs Core.cs VersaoInfo.cs /main:ProgramaHost
+"%CSC%" /nologo /target:exe /platform:anycpu /codepage:65001 /optimize+ /win32icon:"firawselector.ico" /r:System.dll /r:System.Web.Extensions.dll /r:System.Management.dll /out:"FirawSelector Host.exe" FirawSelectorHost.cs Core.cs VersaoInfo.cs /main:ProgramaHost
 if errorlevel 1 exit /b 1
 call :sign "FirawSelector Host.exe"
 if errorlevel 1 exit /b 1
