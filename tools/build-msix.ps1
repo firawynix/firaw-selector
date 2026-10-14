@@ -1,7 +1,10 @@
 [CmdletBinding()]
 param(
     [ValidateSet('Store', 'Lab')]
-    [string]$Channel = 'Store'
+    [string]$Channel = 'Store',
+    [string]$LabCertificateThumbprint = '',
+    [ValidateRange(0, 65535)]
+    [int]$LabRevision = 0
 )
 
 $ErrorActionPreference = 'Stop'
@@ -19,6 +22,7 @@ if (-not $versionMatch.Success) {
     throw 'Não foi possível obter Amb.Versao em Core.cs.'
 }
 $version = "$($versionMatch.Groups[1].Value).0"
+if ($Channel -eq 'Lab') { $version = "$($versionMatch.Groups[1].Value).$LabRevision" }
 
 $sdkBin = Get-ChildItem 'C:\Program Files (x86)\Windows Kits\10\bin' -Directory |
     Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } |
@@ -45,14 +49,15 @@ $signingThumbprint = ''
 if ($Channel -eq 'Lab') {
     $certificate = Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert |
         Where-Object {
-            $_.Subject -eq 'CN=Firawynix Laboratorio' -and
+            (($LabCertificateThumbprint -and $_.Thumbprint -eq $LabCertificateThumbprint) -or
+             (-not $LabCertificateThumbprint -and $_.Subject -eq 'CN=Firawynix Laboratorio')) -and
             $_.HasPrivateKey -and
             $_.NotAfter -gt (Get-Date)
         } |
         Sort-Object NotAfter -Descending |
         Select-Object -First 1
     if (-not $certificate) {
-        throw 'Certificado CN=Firawynix Laboratorio não encontrado.'
+        throw 'Certificado de assinatura Lab não encontrado.'
     }
     $packageName = 'Firawynix.FirawSelector.Lab'
     $publisher = $certificate.Subject
@@ -83,16 +88,7 @@ New-Item -ItemType Directory -Path $cursorDestination -Force | Out-Null
 Copy-Item -Path (Join-Path $projectRoot 'assets\cursors\marioa\*.ani') `
     -Destination $cursorDestination
 
-$csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
-if (-not (Test-Path -LiteralPath $csc)) {
-    $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework\v4.0.30319\csc.exe'
-}
-$iconTool = Join-Path $stageRoot 'mkico.exe'
-& $csc /nologo /target:exe /codepage:65001 /r:System.dll /r:System.Drawing.dll `
-    "/out:$iconTool" (Join-Path $projectRoot 'tools\mkico.cs')
-if ($LASTEXITCODE -ne 0) {
-    throw 'Falha ao compilar o gerador de ativos.'
-}
+$iconTool = Join-Path $projectRoot 'tools\mkico.exe'
 & $iconTool (Join-Path $stage 'firawselector.ico') (Join-Path $stage 'Assets')
 if ($LASTEXITCODE -ne 0) {
     throw 'Falha ao gerar os ativos MSIX.'

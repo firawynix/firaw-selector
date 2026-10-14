@@ -44,6 +44,12 @@
           Category="windows.protocol"
           Executable="FirawSelector.exe"
           EntryPoint="Windows.FullTrustApplication">
+          <uap3:Protocol Name="firawselector" Parameters="&quot;%1&quot;" />
+        </uap3:Extension>
+        <uap3:Extension
+          Category="windows.protocol"
+          Executable="FirawSelector.exe"
+          EntryPoint="Windows.FullTrustApplication">
           <uap3:Protocol Name="http" Parameters="&quot;%1&quot;" />
         </uap3:Extension>
         <uap3:Extension

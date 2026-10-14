@@ -207,6 +207,9 @@ class Instalador : JanelaFiraw
         Extrai(manifesto, Path.Combine(pasta, "manifest.json"));
         Extrai("ext.background.js", Path.Combine(pasta, "background.js"));
         Extrai("ext.content.js", Path.Combine(pasta, "content.js"));
+        Extrai("ext.options.html", Path.Combine(pasta, "options.html"));
+        Extrai("ext.options.js", Path.Combine(pasta, "options.js"));
+        Extrai("ext.options.css", Path.Combine(pasta, "options.css"));
         foreach (string tamanho in new string[] { "16", "32", "48", "128" })
             Extrai("ext.icon" + tamanho + ".png", Path.Combine(pasta, "icon" + tamanho + ".png"));
     }

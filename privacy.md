@@ -18,7 +18,14 @@ When you open a link, FirawSelector passes that link to the browser and profile
 selected by your local rules. The chosen browser, not FirawSelector, then
 contacts the destination. Optional browser extensions send the clicked URL to
 the local FirawSelector application through the browser's native messaging
-interface. They do not send it to Firawynix servers.
+interface or the `firawselector:` protocol for the Microsoft Store edition.
+They do not send it to Firawynix servers.
+
+If you select **Remember for this site**, the extension stores the source
+site's origin and your selected opening method in local extension storage.
+It does not store a list of clicked URLs. These preferences stay in the
+current browser profile. Open the extension's settings to change or forget
+a saved choice. Removing the extension also removes these preferences.
 
 Build tools may access package repositories while maintainers create a release.
 That build-time activity isn't part of the installed application's behavior.

@@ -44,7 +44,7 @@ static class ProgramaHost
             string motor = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Amb.Produto + ".exe");
             if (!File.Exists(motor)) throw new Exception("FirawSelector.exe nao foi encontrado.");
 
-            ProcessStartInfo psi = new ProcessStartInfo(motor, "--ask " + Argumento(url));
+            ProcessStartInfo psi = new ProcessStartInfo(motor, Argumento(url));
             psi.UseShellExecute = false;
             psi.WorkingDirectory = Path.GetDirectoryName(motor);
             Process.Start(psi);
