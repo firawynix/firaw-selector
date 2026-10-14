@@ -18,7 +18,7 @@ static class Amb
 {
     public const string Produto = "FirawSelector";
     public const string Marca = "Firawynix";
-    public const string Versao = "1.1.12";
+    public const string Versao = "1.1.14";
     public const string Site = "https://firawselector.firawynix.com.br";
     public const string Repo = "https://github.com/firawynix/firaw-selector";
 
@@ -626,6 +626,16 @@ static class Idioma
         A("op.tempo", "Escolher sozinho depois de (segundos, 0 desliga)",
                       "Auto-pick after (seconds, 0 turns it off)");
         A("op.lembrar", "Lembrar a escolha por site", "Remember the choice per site");
+        A("op.ext.titulo", "Extensões dos navegadores (Store)", "Browser extensions (Store)");
+        A("op.ext.conectar", "Conectar extensões", "Connect extensions");
+        A("op.ext.desconectar", "Desconectar extensões", "Disconnect extensions");
+        A("op.ext.confirmar", "Usar esta edição da Store para receber links das extensões do Chrome, Opera, Edge e Firefox neste usuário? A ponte anterior será guardada para restauração. Não é necessário administrador.",
+            "Use this Store edition for links from Chrome, Opera, Edge and Firefox extensions for this user? The previous bridge will be saved for restoration. Administrator privileges are not required.");
+        A("op.ext.ok", "Integração ativada. Use a extensão publicada ou a pasta de teste com chave. Reabra o navegador se ele já estava aberto.",
+            "Integration enabled. Use the published extension or the keyed test folder. Restart the browser if it was already open.");
+        A("op.ext.off", "Integração desativada e ponte anterior restaurada quando disponível.", "Integration disabled; previous bridge restored when available.");
+        A("op.ext.win11", "A integração nativa da edição Store requer Windows 11. No Windows 10, use a abertura pelo protocolo ou as associações padrão.",
+            "The Store native bridge requires Windows 11. On Windows 10, use protocol activation or default associations.");
         A("op.esquecer", "Esquecer os {0} site(s) lembrado(s)", "Forget the {0} remembered site(s)");
         A("op.shift", "Segurar Shift sempre abre a janela de escolha",
                       "Holding Shift always opens the picker");

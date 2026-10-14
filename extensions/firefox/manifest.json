@@ -2,8 +2,10 @@
   "manifest_version": 3,
   "name": "FirawSelector",
   "description": "Envia o link clicado ao FirawSelector instalado no computador para escolher em qual navegador ou perfil abri-lo.",
-  "version": "1.1.0",
-  "permissions": ["nativeMessaging"],
+  "version": "1.1.4",
+  "permissions": ["nativeMessaging", "storage"],
+  "options_ui": { "page": "options.html", "open_in_tab": true },
+  "action": { "default_popup": "options.html" },
   "icons": {
     "16": "icon16.png",
     "32": "icon32.png",

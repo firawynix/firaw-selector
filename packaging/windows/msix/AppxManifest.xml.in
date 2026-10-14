@@ -3,9 +3,12 @@
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
+  xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4"
   xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
+  xmlns:virtualization="http://schemas.microsoft.com/appx/manifest/virtualization/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap uap3 uap10 rescap">
+  IgnorableNamespaces="uap uap3 uap5 uap10 desktop4 rescap virtualization">
   <Identity
     Name="@@PACKAGE_NAME@@"
     Publisher="@@PUBLISHER@@"
@@ -16,6 +19,18 @@
     <PublisherDisplayName>Firawynix</PublisherDisplayName>
     <Description>Escolha em qual navegador cada link deve abrir.</Description>
     <Logo>Assets\StoreLogo.png</Logo>
+    <virtualization:RegistryWriteVirtualization>
+      <virtualization:ExcludedKeys>
+        <virtualization:ExcludedKey>HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.firawynix.firaw_selector</virtualization:ExcludedKey>
+        <virtualization:ExcludedKey>HKEY_CURRENT_USER\Software\Microsoft\Edge\NativeMessagingHosts\com.firawynix.firaw_selector</virtualization:ExcludedKey>
+        <virtualization:ExcludedKey>HKEY_CURRENT_USER\Software\Mozilla\NativeMessagingHosts\com.firawynix.firaw_selector</virtualization:ExcludedKey>
+      </virtualization:ExcludedKeys>
+    </virtualization:RegistryWriteVirtualization>
+    <virtualization:FileSystemWriteVirtualization>
+      <virtualization:ExcludedDirectories>
+        <virtualization:ExcludedDirectory>$(KnownFolder:LocalAppData)\FirawSelectorStore</virtualization:ExcludedDirectory>
+      </virtualization:ExcludedDirectories>
+    </virtualization:FileSystemWriteVirtualization>
   </Properties>
   <Resources>
     <Resource Language="pt-BR" />
@@ -31,6 +46,7 @@
     <Application
       Id="App"
       Executable="FirawSelector.exe"
+      desktop4:SupportsMultipleInstances="true"
       uap10:RuntimeBehavior="packagedClassicApp"
       uap10:TrustLevel="mediumIL">
       <uap:VisualElements
@@ -40,6 +56,18 @@
         Square44x44Logo="Assets\Square44x44Logo.png"
         Square150x150Logo="Assets\Square150x150Logo.png" />
       <Extensions>
+        <uap5:Extension Category="windows.appExecutionAlias"
+          Executable="FirawSelector Host.exe" EntryPoint="Windows.FullTrustApplication">
+          <uap5:AppExecutionAlias desktop4:Subsystem="console">
+            <uap5:ExecutionAlias Alias="@@HOST_ALIAS@@" />
+          </uap5:AppExecutionAlias>
+        </uap5:Extension>
+        <uap3:Extension
+          Category="windows.protocol"
+          Executable="FirawSelector.exe"
+          EntryPoint="Windows.FullTrustApplication">
+          <uap3:Protocol Name="firawselector" Parameters="&quot;%1&quot;" />
+        </uap3:Extension>
         <uap3:Extension
           Category="windows.protocol"
           Executable="FirawSelector.exe"
@@ -82,5 +110,6 @@
   </Applications>
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
+    <rescap:Capability Name="unvirtualizedResources" />
   </Capabilities>
 </Package>

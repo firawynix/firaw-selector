@@ -178,9 +178,8 @@ class Escolha : JanelaFiraw
         int largura = enxuto ? 400 : 520;
         int y = enxuto ? 12 : 14;
 
-        // No modo enxuto so ficam icone, nome e numero. O endereco, as caixas e
-        // os botoes saem — o teclado continua fazendo tudo (1-9, Enter, Esc,
-        // Ctrl para privativo).
+        // No modo enxuto ficam as linhas e a escolha de lembrar o site. O
+        // teclado continua fazendo tudo (1-9, Enter, Esc, Ctrl para privativo).
         if (!enxuto)
         {
             lblUrl = new Label();
@@ -234,6 +233,14 @@ class Escolha : JanelaFiraw
 
         if (enxuto)
         {
+            if (podeLembrar && !string.IsNullOrEmpty(host))
+            {
+                chkLembrar = UI.Caixa(Idioma.T("esc.lembrar", host), 16, y, false);
+                chkLembrar.Enabled = cfg.Lembrar;
+                chkLembrar.Width = largura - 32;
+                Corpo.Controls.Add(chkLembrar);
+                y += 30;
+            }
             y += 4;
 
             // Rodape: e por aqui que se chega nas Configuracoes e se volta ao
@@ -548,11 +555,37 @@ class EditorDeLink : JanelaFiraw
 // ---------------------------------------------------------------------------
 static class Programa
 {
+    static bool LinkDoProtocolo(string entrada, out string link)
+    {
+        link = null;
+        if (entrada.Length > 16384) return false;
+
+        Uri uri;
+        if (!Uri.TryCreate(entrada, UriKind.Absolute, out uri) ||
+            !string.Equals(uri.Scheme, "firawselector", StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(uri.Host, "open", StringComparison.OrdinalIgnoreCase) ||
+            uri.AbsolutePath != "/" || !uri.Query.StartsWith("?url=", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        string codificado = uri.Query.Substring(5);
+        if (codificado.Length == 0 || codificado.Contains("&")) return false;
+
+        string destino = Uri.UnescapeDataString(codificado);
+        Uri valido;
+        if (!Uri.TryCreate(destino, UriKind.Absolute, out valido) ||
+            (valido.Scheme != Uri.UriSchemeHttp && valido.Scheme != Uri.UriSchemeHttps))
+            return false;
+
+        link = destino;
+        return true;
+    }
+
     [STAThread]
     static int Main(string[] args)
     {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
+        IntegracaoStore.AtualizaSeAtiva();
         AutoUpdate.Verificar("firawselector", Amb.Versao);
 
         List<string> enderecos = new List<string>();
@@ -581,7 +614,13 @@ static class Programa
                 case "--full":
                 case "--completo": enxutoAgora = false; break;
                 default:
-                    if (!a.StartsWith("-")) enderecos.Add(a);
+                    if (a.StartsWith("firawselector:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string link;
+                        if (!LinkDoProtocolo(a, out link)) return 1;
+                        enderecos.Add(link);
+                    }
+                    else if (!a.StartsWith("-")) enderecos.Add(a);
                     break;
             }
         }
@@ -659,7 +698,7 @@ static class Programa
                 // preferência nova gravada.
                 while (true)
                 {
-                    janela = new Escolha(cfg, url, !perguntarAgora);
+                    janela = new Escolha(cfg, url, true);
                     Application.Run(janela);
                     if (!janela.Reabrir) break;
                 }

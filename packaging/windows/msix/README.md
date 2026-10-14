@@ -23,15 +23,28 @@ Microsoft aplica a assinatura pública depois da certificação.
 ```
 
 O pacote de laboratório usa identidade separada e é assinado com o certificado
-`CN=Firawynix Laboratorio` instalado no perfil atual. Ele não substitui nem
-conflita com a versão da Store e não deve ser distribuído como assinatura
-pública.
+`CN=Firawynix Laboratorio` instalado no perfil atual. Ele não substitui o pacote
+da Store e não deve ser distribuído como assinatura pública. O parâmetro
+`-LabCertificateThumbprint` permite escolher um certificado de teste existente;
+o script não altera a confiança do Windows.
 
-O pacote da Store declara somente `runFullTrust`. Os protocolos HTTP/HTTPS/FTP,
-o protocolo `microsoft-edge` e os arquivos HTML são associados pelo próprio
-manifesto, sem desabilitar a virtualização do Windows.
+O pacote 1.1.14 declara `runFullTrust` e `unvirtualizedResources`. Os protocolos
+HTTP/HTTPS/FTP, `microsoft-edge`, `firawselector` e os arquivos HTML são
+associados pelo próprio manifesto. O usuário escolhe as associações padrão
+nas configurações do Windows; o aplicativo não as altera automaticamente.
 
-A ponte de Native Messaging para extensões do Chrome, Edge, Opera e Firefox não é
-incluída no MSIX: esses navegadores precisam enxergar chaves HKCU globais, que
-ficam isoladas no contêiner do pacote. Quem precisa capturar também os cliques
-dentro do navegador deve usar o instalador clássico disponibilizado no site.
+A ponte Native Messaging está incluída no MSIX e é opcional. No Windows 11,
+abra **Opções → Conectar extensões** no Studio e confirme a integração por
+usuário. As exclusões da virtualização se limitam às três chaves HKCU do
+próprio host e a `%LOCALAPPDATA%\FirawSelectorStore`; não há desativação global.
+O alias `FirawSelectorNativeHost.exe` oferece um caminho estável ao navegador.
+O laboratório usa um alias separado. No Windows 10, use as associações padrão
+ou o protocolo manual; a ponte nativa do MSIX requer Windows 11.
+
+Para testes sem loja, carregue `dist\extensions\chrome` no Chromium/Opera.
+Essa pasta mantém a chave do ID local autorizado. A pasta `chrome-store` e
+os ZIPs de loja não têm chave: carregá-los sem compactação gera outro ID, não
+autorizado pela ponte. As lojas atribuem seus IDs conhecidos na publicação.
+
+Consulte `certification-notes-1.1.14.md` para o escopo da capacidade restrita
+e as instruções de teste destinadas aos avaliadores da Microsoft.

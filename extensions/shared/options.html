@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FirawSelector — sites lembrados</title>
+<link rel="stylesheet" href="options.css">
+<body>
+  <header><img src="icon48.png" alt=""><div><h1>FirawSelector</h1><p>Escolhas por site</p></div></header>
+  <main>
+    <p>Ao clicar em um link, marque “Lembrar para este site”. Os links seguintes desse site seguirão a sua escolha.</p>
+    <p>Para mudar o navegador ou perfil de um destino, configure uma regra no FirawSelector Studio. Use Shift + clique para rever como abrir um link.</p>
+    <h2>Sites lembrados</h2>
+    <div id="sites"></div>
+    <p id="status" role="status"></p>
+    <h2>Diagnóstico da ponte</h2>
+    <p id="extensao-id"></p>
+    <button id="testar-ponte" type="button">Testar ponte local</button>
+    <p id="ponte" role="status">O teste não abre links nem muda suas preferências.</p>
+    <p id="ultima-abertura">Nenhum clique registrado por esta versão de diagnóstico.</p>
+    <p class="nota">Só o último horário, resultado técnico e versão da ponte ficam neste perfil. Nenhum endereço clicado é gravado pelo diagnóstico.</p>
+    <p class="nota">As preferências ficam somente neste perfil do navegador. A confirmação do navegador para abrir um aplicativo externo é controlada pelo próprio navegador.</p>
+  </main>
+  <script src="options.js"></script>
+</body>
+</html>

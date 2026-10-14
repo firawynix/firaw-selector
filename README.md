@@ -117,10 +117,17 @@ Vários endereços de uma vez: o primeiro pergunta, os outros seguem a mesma esc
 
 ## Extensões para links dentro do navegador
 
-O instalador copia quatro extensões para `%LOCALAPPDATA%\FirawSelector\Extensoes` e
+O instalador clássico copia quatro extensões para `%LOCALAPPDATA%\FirawSelector\Extensoes` e
 registra automaticamente a ponte nativa usada por elas. A extensão não duplica
 regras nem configurações: ela entrega o endereço ao aplicativo e o
-FirawSelector abre a mesma janela de escolha de sempre.
+FirawSelector aplica suas regras ou abre a janela de escolha.
+
+Na edição Store 1.1.14 ou mais recente, no Windows 11, abra **Opções** no
+FirawSelector Studio e clique em **Conectar extensões**. Confirme a integração
+para seu usuário. O aplicativo registra apenas a própria ponte, sem exigir
+administrador. **Desconectar extensões** restaura os apontamentos anteriores
+que ainda pertençam a essa integração. O Windows 10 mantém as associações de
+links e o protocolo manual, mas não oferece essa ponte nativa do MSIX.
 
 Para testar uma versão ainda não publicada:
 
@@ -204,10 +211,13 @@ identidade oficial `Firawynix.FirawSelector` reservada no Partner Center.
 separada e o certificado local de laboratório para testes de sideload. Consulte
 `packaging/windows/msix/README.md` antes de distribuir o pacote.
 
-O MSIX usa as associações nativas do manifesto para links e arquivos HTML. A
-integração opcional com extensões do Chrome, Edge, Opera e Firefox fica no instalador
-clássico, pois o contêiner MSIX isola as chaves de Native Messaging que precisam
-ser lidas por esses navegadores.
+O MSIX usa as associações nativas do manifesto para links e arquivos HTML.
+A partir da 1.1.14, inclui também o host Native Messaging e um alias de
+execução estável. No Windows 11, a integração opcional exclui da virtualização
+somente três chaves HKCU do próprio host e a pasta `FirawSelectorStore` em
+LocalAppData. Isso exige a capacidade restrita `unvirtualizedResources` e
+avaliação da Microsoft. O usuário ativa a ponte nas opções; o pacote não
+substitui automaticamente a integração clássica nem usa seu atualizador EXE.
 
 Arquivos:
 
