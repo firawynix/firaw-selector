@@ -3,11 +3,16 @@
 const HOST = "com.firawynix.firaw_selector";
 
 chrome.runtime.onMessage.addListener((mensagem, remetente, responder) => {
-  if (!mensagem || mensagem.type !== "firaw-open") return false;
+  if (!mensagem || (mensagem.type !== "firaw-open" && mensagem.type !== "firaw-protocol")) return false;
 
   const pagina = remetente && remetente.url ? remetente.url : "";
   if (!/^https?:\/\//i.test(pagina) || !/^https?:\/\//i.test(mensagem.url)) {
     responder({ ok: false, error: "Origem ou endereço não permitido." });
+    return false;
+  }
+
+  if (mensagem.type === "firaw-protocol") {
+    responder({ ok: true, protocol: "firawselector://open/?url=" + encodeURIComponent(mensagem.url) });
     return false;
   }
 

@@ -29,7 +29,7 @@
 
 - 2026-10-14: Store 1.1.13.0 built; manifest adds custom `firawselector`
   protocol with quoted `%1`. Only HTTP(S) destinations accepted. Native host
-  still omitted. Optional extension 1.1.2 offers protocol fallback and local
+  still omitted. Optional extension 1.1.3 offers protocol fallback and local
   source-site preferences; standard browser/rule flow remains available.
 - Lab 1.1.13.1 installed, status `Ok`. Lab revision avoids reinstalling changed
   bytes with identical identity/version. `-LabCertificateThumbprint` can use

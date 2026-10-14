@@ -10,7 +10,6 @@ function simulaClique(resposta, preferencias = {}) {
   let chamadas = 0;
   let navegou;
   let preveniu;
-  const tarefas = [];
   const gravados = {};
   const elementos = [];
   class Elemento {
@@ -39,7 +38,12 @@ function simulaClique(resposta, preferencias = {}) {
   const chrome = {
     runtime: {
       lastError: null,
-      sendMessage: (_, callback) => { chamadas++; callback(resposta); }
+      sendMessage: (mensagem, callback) => {
+        chamadas++;
+        callback(mensagem.type === "firaw-protocol"
+          ? { ok: true, protocol: "firawselector://open/?url=" + encodeURIComponent(mensagem.url) }
+          : resposta);
+      }
     },
     storage: {
       local: {
@@ -54,7 +58,7 @@ function simulaClique(resposta, preferencias = {}) {
     location: {
       href: "https://origem.example/", origin: "https://origem.example", host: "origem.example",
       assign: (url) => { navegou = url; }
-    }, encodeURIComponent, setTimeout: (callback) => tarefas.push(callback)
+    }, encodeURIComponent
   });
   const origem = new Elemento("a");
   const atributos = { href: "https://example.com/a?x=1&y=2", target: "_blank" };
@@ -65,7 +69,6 @@ function simulaClique(resposta, preferencias = {}) {
     removeAttribute: (nome) => { delete atributos[nome]; }
   };
   function clica(extra = {}) {
-    while (tarefas.length) tarefas.shift()();
     preveniu = false;
     aoClicar({
     isTrusted: true, defaultPrevented: false, type: "click", button: 0,
@@ -76,8 +79,7 @@ function simulaClique(resposta, preferencias = {}) {
   return { elementos, gravados, clica, mudou,
     get navegou() { return navegou; }, get chamadas() { return chamadas; },
     get href() { return atributos.href; }, get target() { return atributos.target; },
-    get preveniu() { return preveniu; },
-    terminaEvento() { while (tarefas.length) tarefas.shift()(); } };
+    get preveniu() { return preveniu; } };
 }
 
 assert.equal(simulaClique({ ok: true }).elementos.length, 0);
@@ -94,20 +96,21 @@ assert.equal(Object.keys(teste.gravados).length, 0, "Clique sintético não salv
 linkStore.eventos.click({ isTrusted: true });
 assert.equal(teste.gravados["siteRoute:https://origem.example"], "store");
 teste.clica();
-assert.equal(teste.chamadas, 1, "Site lembrado não tenta a ponte nativa novamente");
-assert.equal(teste.href, linkStore.href);
-assert.equal(teste.preveniu, false, "Caminho lembrado usa a navegação padrão do clique real");
-assert.equal(teste.target, undefined, "Protocolo abre no contexto do clique, sem nova aba");
-assert.equal(teste.navegou, undefined, "Painel lateral não depende de location.assign");
-teste.terminaEvento();
+assert.equal(teste.chamadas, 2, "Site lembrado encaminha cada clique pelo background");
+assert.equal(teste.navegou, linkStore.href);
+assert.equal(teste.preveniu, true);
 assert.equal(teste.href, "https://example.com/a?x=1&y=2");
-assert.equal(teste.target, "_blank", "Atributos originais são restaurados depois do clique");
+assert.equal(teste.target, "_blank", "Os atributos da página não são alterados");
 teste.clica({ shiftKey: true });
-assert.equal(teste.chamadas, 2, "Shift permite rever a escolha");
+assert.equal(teste.chamadas, 3, "Shift permite rever a escolha");
 
 const restaurado = simulaClique(null, { "siteRoute:https://origem.example": "store" });
-assert.equal(restaurado.chamadas, 0);
-assert.equal(restaurado.href, linkStore.href);
+assert.equal(restaurado.chamadas, 1);
+assert.equal(restaurado.navegou, linkStore.href);
+restaurado.clica({ isTrusted: false });
+assert.equal(restaurado.chamadas, 1, "Clique sintético não abre aplicativo externo");
+restaurado.clica();
+assert.equal(restaurado.chamadas, 2, "Cliques repetidos passam pelo background individualmente");
 const normal = simulaClique(null, { "siteRoute:https://origem.example": "normal" });
 assert.equal(normal.chamadas, 0);
 assert.equal(normal.navegou, undefined, "Abrir normalmente deixa o evento original seguir");

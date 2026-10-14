@@ -39,7 +39,7 @@ this browser for example.com” and a browser. The next example.com link uses
 that choice. Review rules and remembered sites in Studio. No account,
 credentials, elevation, or server access is needed for this flow.
 
-With extension 1.1.2, click a link in an ordinary HTTP(S) page. If the native
+With extension 1.1.3, click a link in an ordinary HTTP(S) page. If the native
 host is absent, select the Store option in the extension's prompt. Select
 “Remember for this site” to reuse that method for future clicks from the
 same source origin. The extension settings allow changing or forgetting
@@ -62,4 +62,6 @@ Firawynix. See the
   remembered source origins, another origin, Shift, and forgetting a choice.
 - Compiled engine checks cover remembered browser/profile selection,
   unrelated domains, Shift, and rejection of non-HTTP(S) protocol payloads.
-- User's final repeat-click test is pending; certification isn't submitted.
+- User's final Opera sidebar repeat-click test is pending; certification
+  isn't submitted. Don't submit extension 1.1.1 or 1.1.2: the user reported
+  repeated-click activation failures in that sidebar.

@@ -34,14 +34,20 @@ alterar apenas o manifesto da extensão não recria o host ausente.
 
 1.1.13: manifesto MSIX registra `firawselector://open/?url=...` →
 `Programa.LinkDoProtocolo()` aceita só HTTP(S) → segue as regras existentes.
-Extensão 1.1.2: falha nativa mostra link real para protocolo + caixa lembrar.
+Extensão 1.1.3: falha nativa mostra link real para protocolo + caixa lembrar.
 `content.js`: `storage.local` guarda `siteRoute:<origin>` = store/normal;
 cache no clique preserva gesto; `onChanged` atualiza abas abertas.
-Opera/WhatsApp lateral: usuário relatou que rota lembrada via location.assign
-não ativava seletor. Caminho lembrado reescreve temporariamente o href do link
-original e mantém ação padrão do clique; restaura href/target/download depois.
-Teste automático confirma ação padrão, ausência de assign e restauração.
-Teste interativo dessa correção ainda pendente.
+Opera/WhatsApp lateral: usuário relatou falha no segundo clique via assign
+direto (1.1.1) e via href temporário do clique padrão (1.1.2).
+1.1.3: todo clique confiável chama background, inclusive rota Store lembrada.
+`background.js` valida origem/destino HTTP(S) e devolve protocolo codificado;
+renderer navega depois da resposta. Não altera href/target da página.
+Hipótese: ativação externa/foco no painel lateral. Fonte Chromium
+`chrome/browser/external_protocol/external_protocol_handler.cc` documenta
+controle anti-flood e chamadas de extensão; não há mudança de política.
+Testes: cliques repetidos acionam background, sintéticos não; validação
+do background testada em `tests/background-routing.test.js`.
+Resultado interativo da 1.1.3 ainda pendente; não declarar resolvido.
 `options.html/js`: popup permite trocar/esquecer por site de origem.
 Origem é o site onde clicou; regras no Studio são para o destino/perfil.
 Permissão de abrir aplicativo externo pertence ao navegador.

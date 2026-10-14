@@ -33,10 +33,13 @@
       destino.hash !== atual.hash;
   }
 
-  function entrega(url) {
-    chrome.runtime.sendMessage({ type: "firaw-open", url }, (resposta) => {
+  function entrega(url, usarStore) {
+    chrome.runtime.sendMessage({ type: usarStore ? "firaw-protocol" : "firaw-open", url }, (resposta) => {
       const falha = chrome.runtime.lastError;
-      if (!falha && resposta && resposta.ok) return;
+      if (!falha && resposta && resposta.ok) {
+        if (usarStore && resposta.protocol) location.assign(resposta.protocol);
+        return;
+      }
 
       const detalhe = falha ? falha.message :
         (resposta && resposta.error ? resposta.error : "integração indisponível");
@@ -114,26 +117,11 @@
     // Shift permite escolher de novo sem apagar a preferência salva.
     if (rota === "normal" && !evento.shiftKey) return;
 
-    if (rota === "store" && !evento.shiftKey) {
-      // Opera pode ignorar location.assign para protocolos externos em painéis
-      // laterais. Deixa o navegador seguir o próprio link do clique confiável.
-      const atributos = ["href", "target", "download"];
-      const originais = atributos.map((nome) => link.getAttribute(nome));
-      link.setAttribute("href", protocolo(destino.href));
-      link.removeAttribute("target");
-      link.removeAttribute("download");
-      evento.stopImmediatePropagation();
-      setTimeout(() => {
-        atributos.forEach((nome, i) => {
-          if (originais[i] === null) link.removeAttribute(nome);
-          else link.setAttribute(nome, originais[i]);
-        });
-      }, 0);
-      return;
-    }
     evento.preventDefault();
     evento.stopImmediatePropagation();
-    entrega(destino.href);
+    // O caminho lembrado também valida/encaminha cada clique real pela extensão,
+    // em vez de iniciar navegação externa só pelo renderer da página.
+    entrega(destino.href, rota === "store" && !evento.shiftKey);
   }
 
   document.addEventListener("click", intercepta, true);
