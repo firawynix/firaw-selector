@@ -22,32 +22,36 @@ Instalação: `FirawSelectorSetup.cs:Instalador.Instalar()`
 - Registra Chrome, Edge e Firefox em HKCU. Opera lê a ponte Chromium no teste
   local; o ID atribuído pela loja ainda precisa ser confirmado.
 
-Store MSIX: `tools/build-msix.ps1` inclui motor + Studio, mas não inclui
-`FirawSelector Host.exe`. `packaging/windows/msix/AppxManifest.xml.in` declara
-associações de URL/HTML, não Native Messaging. Em 2026-10-14, instalação
-MSIX 1.1.12 estava presente e as chaves HKCU de NativeMessagingHosts apontavam
-para manifestos ausentes em `%LOCALAPPDATA%\FirawSelector\Integracao`; portanto
-as extensões não alcançam o app Store por essa ponte. A edição clássica do Center
-usa `FirawSelectorSetup.cs:RegistraHostNativo()` e funciona quando seus arquivos
-estão presentes. Compatibilidade Store exige um canal adicional verificável;
-alterar apenas o manifesto da extensão não recria o host ausente.
+Store 1.1.12 não incluía host; HKCU apontava para manifestos clássicos ausentes.
+Store 1.1.14: `tools/build-msix.ps1` inclui motor, Studio, host e
+`native-host-alias.txt`. `NativeIntegration.cs:IntegracaoStore.Conectar()` exige
+confirmação no Studio, salva apontamentos anteriores e registra o próprio host.
+Windows 11: exclusões finas em `AppxManifest.xml.in` para três chaves HKCU
+NativeMessagingHosts e LocalAppData/FirawSelectorStore. Capacidade nova:
+`unvirtualizedResources`; não desativa virtualização globalmente.
+`AtualizaSeAtiva()` não substitui apontamentos alterados por instalação clássica.
+`Desconectar()` restaura somente os apontamentos que ainda sejam seus.
+Host via caminho direto WindowsApps falhou com Access Denied no teste.
+Alias console MSIX estável respondeu ping stdio com versão 1.1.14.
+Alias Lab separado evita conflito com produção. Host ativa protocolo via Shell
+para manter identidade/configuração do pacote; não navega no renderer do browser.
 
 1.1.13: manifesto MSIX registra `firawselector://open/?url=...` →
 `Programa.LinkDoProtocolo()` aceita só HTTP(S) → segue as regras existentes.
-Extensão 1.1.3: falha nativa mostra link real para protocolo + caixa lembrar.
+Extensão 1.1.4: todo clique usa Native Messaging; falha mostra protocolo manual.
 `content.js`: `storage.local` guarda `siteRoute:<origin>` = store/normal;
 cache no clique preserva gesto; `onChanged` atualiza abas abertas.
-Opera/WhatsApp lateral: usuário relatou falha no segundo clique via assign
-direto (1.1.1) e via href temporário do clique padrão (1.1.2).
-1.1.3: todo clique confiável chama background, inclusive rota Store lembrada.
-`background.js` valida origem/destino HTTP(S) e devolve protocolo codificado;
-renderer navega depois da resposta. Não altera href/target da página.
+Opera/WhatsApp lateral: usuário relatou falha no segundo clique nas tentativas
+por protocolo 1.1.1, 1.1.2 e 1.1.3. Não publicar essas tentativas.
+`background.js` valida origem/destino HTTP(S) e chama host local em cada clique.
+Não altera href/target nem navega automaticamente por protocolo no renderer.
 Hipótese: ativação externa/foco no painel lateral. Fonte Chromium
 `chrome/browser/external_protocol/external_protocol_handler.cc` documenta
 controle anti-flood e chamadas de extensão; não há mudança de política.
 Testes: cliques repetidos acionam background, sintéticos não; validação
 do background testada em `tests/background-routing.test.js`.
-Resultado interativo da 1.1.3 ainda pendente; não declarar resolvido.
+2026-10-14: usuário confirmou seletor em vários cliques/links no WhatsApp lateral
+após trocar cópia local sem key pela cópia com key; erro do diagnóstico separado.
 `options.html/js`: popup permite trocar/esquecer por site de origem.
 Origem é o site onde clicou; regras no Studio são para o destino/perfil.
 Permissão de abrir aplicativo externo pertence ao navegador.
@@ -55,7 +59,17 @@ Permissão de abrir aplicativo externo pertence ao navegador.
 Modo compacto também mostra a caixa de lembrar o domínio do destino.
 Testes: `tests/extension-fallback.test.js`; parsing HTTP(S), domínio lembrado,
 isolamento entre sites e Shift verificados por reflexão no motor compilado.
-Usuário confirmou protocolo MSIX interativo; teste de lembrar ainda pendente.
+Usuário confirmou protocolo MSIX, cliques repetidos e ping direto versão 1.1.14.
+Teste local Chromium deve carregar `dist/extensions/chrome` (key/ID estável).
+`chrome-store` sem key gera ID local fora do allowed_origins; só usar ZIP sem
+key na loja, que atribui seu próprio ID conhecido.
+ID local kolmilnfjchhnciifefpkhnoacppjpjm corresponde ao hash do caminho UTF-16
+de dist/extensions/chrome-store. Não adicionar ID aleatório à lista pública.
+`options.js`: ping usa sendNativeMessage diretamente (API disponível em página
+da extensão); canal interno sendMessage fechava sem resposta no Opera do usuário.
+`background.js`: bridgeLastOpen guarda só último horário/estado/versão, não URL.
+`tests/options-diagnostic.test.js`: ping direto, falha e horário completo.
+Usuário confirmou ping direto e último clique aceito pelo host 1.1.14.
 
 Build: `build.cmd` → executáveis + quatro ZIPs em `dist/`
 - Store ZIPs for Chrome, Edge, and Opera omit the manifest `key` field.

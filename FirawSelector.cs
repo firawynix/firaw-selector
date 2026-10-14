@@ -585,6 +585,7 @@ static class Programa
     {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
+        IntegracaoStore.AtualizaSeAtiva();
         AutoUpdate.Verificar("firawselector", Amb.Versao);
 
         List<string> enderecos = new List<string>();

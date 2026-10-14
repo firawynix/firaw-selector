@@ -8,7 +8,7 @@ using System.Web.Script.Serialization;
 // ---------------------------------------------------------------------------
 // Ponte entre as extensoes e o aplicativo. O navegador fala Native Messaging:
 // cada JSON vem precedido pelo tamanho em 32 bits. O host valida o endereco,
-// inicia o motor em modo de pergunta e responde antes de encerrar.
+// inicia o motor seguindo as regras do usuário e responde antes de encerrar.
 // ---------------------------------------------------------------------------
 static class ProgramaHost
 {
@@ -47,6 +47,13 @@ static class ProgramaHost
             ProcessStartInfo psi = new ProcessStartInfo(motor, Argumento(url));
             psi.UseShellExecute = false;
             psi.WorkingDirectory = Path.GetDirectoryName(motor);
+            if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppxManifest.xml")))
+            {
+                // Ativa o aplicativo com identidade de pacote, preservando
+                // suas configurações e as atualizações geridas pela Store.
+                psi = new ProcessStartInfo("firawselector://open/?url=" + Uri.EscapeDataString(url));
+                psi.UseShellExecute = true;
+            }
             Process.Start(psi);
 
             Responde(json, true, "", true);

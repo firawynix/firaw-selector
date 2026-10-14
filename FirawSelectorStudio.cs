@@ -993,6 +993,43 @@ class Studio : JanelaFiraw
         p.AutoScroll = true;
         int y = 0;
 
+        if (Amb.EmPacoteMSIX())
+        {
+            p.Controls.Add(UI.Titulo(Idioma.T("op.ext.titulo"), 0, y));
+            y += 30;
+            Button extensoes = UI.Botao(Idioma.T(IntegracaoStore.Ativa ? "op.ext.desconectar" : "op.ext.conectar"),
+                4, y, 240, null, false);
+            extensoes.Enabled = IntegracaoStore.Disponivel;
+            extensoes.Click += delegate
+            {
+                try
+                {
+                    if (IntegracaoStore.Ativa)
+                    {
+                        IntegracaoStore.Desconectar();
+                        UI.Informa(this, Idioma.T("op.ext.off"));
+                    }
+                    else
+                    {
+                        if (!UI.Confirma(this, Idioma.T("op.ext.confirmar"))) return;
+                        IntegracaoStore.Conectar();
+                        UI.Informa(this, Idioma.T("op.ext.ok"));
+                    }
+                    extensoes.Text = Idioma.T(IntegracaoStore.Ativa ? "op.ext.desconectar" : "op.ext.conectar");
+                }
+                catch (Exception ex) { UI.Aviso(this, ex.Message); }
+            };
+            p.Controls.Add(extensoes);
+            y += 48;
+            if (!IntegracaoStore.Disponivel)
+            {
+                Label avisoIntegracao = UI.Rotulo(Idioma.T("op.ext.win11"), 4, y);
+                avisoIntegracao.MaximumSize = new Size(660, 45);
+                p.Controls.Add(avisoIntegracao);
+                y += 52;
+            }
+        }
+
         p.Controls.Add(UI.Titulo(Idioma.T("op.quando"), 0, y));
         y += 28;
 

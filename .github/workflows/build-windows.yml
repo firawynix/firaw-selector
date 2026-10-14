@@ -15,6 +15,15 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Test extension routing and diagnostics
+        shell: pwsh
+        run: |
+          node tests/extension-fallback.test.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tests/background-routing.test.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tests/options-diagnostic.test.js
+          exit $LASTEXITCODE
       - name: Build application, host, studio, and installer
         shell: cmd
         run: build.cmd

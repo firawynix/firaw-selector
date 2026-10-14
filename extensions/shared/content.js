@@ -33,13 +33,10 @@
       destino.hash !== atual.hash;
   }
 
-  function entrega(url, usarStore) {
-    chrome.runtime.sendMessage({ type: usarStore ? "firaw-protocol" : "firaw-open", url }, (resposta) => {
+  function entrega(url) {
+    chrome.runtime.sendMessage({ type: "firaw-open", url }, (resposta) => {
       const falha = chrome.runtime.lastError;
-      if (!falha && resposta && resposta.ok) {
-        if (usarStore && resposta.protocol) location.assign(resposta.protocol);
-        return;
-      }
+      if (!falha && resposta && resposta.ok) return;
 
       const detalhe = falha ? falha.message :
         (resposta && resposta.error ? resposta.error : "integração indisponível");
@@ -52,13 +49,15 @@
         "box-shadow:0 8px 30px #0008";
 
       const aviso = document.createElement("p");
-      aviso.textContent = "Como abrir os links deste site? Use a opção da Store se instalou o FirawSelector por ela.";
+      aviso.textContent = (rota === "store" ? "Sua escolha está salva, mas a ponte local não respondeu. " : "") +
+        "Para abrir direto pela edição Store 1.1.14 ou mais recente, ative “Conectar extensões” nas opções do FirawSelector Studio. Você também pode abrir este link pelo botão abaixo.";
       aviso.title = detalhe;
       painel.appendChild(aviso);
 
       const lembrarLabel = document.createElement("label");
       const lembrar = document.createElement("input");
       lembrar.type = "checkbox";
+      lembrar.checked = rota === "store" || rota === "normal";
       lembrarLabel.appendChild(lembrar);
       lembrarLabel.appendChild(document.createTextNode(" Lembrar para " + location.host));
       painel.appendChild(lembrarLabel);
@@ -119,9 +118,8 @@
 
     evento.preventDefault();
     evento.stopImmediatePropagation();
-    // O caminho lembrado também valida/encaminha cada clique real pela extensão,
-    // em vez de iniciar navegação externa só pelo renderer da página.
-    entrega(destino.href, rota === "store" && !evento.shiftKey);
+    // As duas edições usam a ponte nativa; o protocolo é uma alternativa manual.
+    entrega(destino.href);
   }
 
   document.addEventListener("click", intercepta, true);

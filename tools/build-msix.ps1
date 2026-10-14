@@ -46,6 +46,7 @@ $packageName = 'Firawynix.FirawSelector'
 $publisher = 'CN=1FDE3668-C222-4506-AFE6-E2E425EAECD8'
 $suffix = 'store'
 $signingThumbprint = ''
+$hostAlias = 'FirawSelectorNativeHost.exe'
 if ($Channel -eq 'Lab') {
     $certificate = Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert |
         Where-Object {
@@ -63,6 +64,7 @@ if ($Channel -eq 'Lab') {
     $publisher = $certificate.Subject
     $signingThumbprint = $certificate.Thumbprint
     $suffix = 'sideload'
+    $hostAlias = 'FirawSelectorNativeHostLab.exe'
 }
 
 $stage = Join-Path $stageRoot $suffix
@@ -78,7 +80,8 @@ New-Item -ItemType Directory -Path (Join-Path $stage 'Assets') -Force | Out-Null
 
 foreach ($file in @(
     'FirawSelector.exe',
-    'FirawSelector Studio.exe'
+    'FirawSelector Studio.exe',
+    'FirawSelector Host.exe'
 )) {
     Copy-Item -LiteralPath (Join-Path $projectRoot $file) -Destination $stage
 }
@@ -97,7 +100,9 @@ if ($LASTEXITCODE -ne 0) {
 $manifest = (Get-Content -LiteralPath $templatePath -Raw).
     Replace('@@PACKAGE_NAME@@', $packageName).
     Replace('@@PUBLISHER@@', $publisher).
-    Replace('@@VERSION@@', $version)
+    Replace('@@VERSION@@', $version).
+    Replace('@@HOST_ALIAS@@', $hostAlias)
+[IO.File]::WriteAllText((Join-Path $stage 'native-host-alias.txt'), $hostAlias, [Text.Encoding]::ASCII)
 $manifestPath = Join-Path $stage 'AppxManifest.xml'
 [IO.File]::WriteAllText($manifestPath, $manifest, [Text.UTF8Encoding]::new($false))
 

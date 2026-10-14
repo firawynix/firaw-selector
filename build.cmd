@@ -15,7 +15,7 @@ set REFS=/r:System.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll /r:Syst
 rem /codepage:65001 - os textos em portugues sao UTF-8; sem isso o csc le pela
 rem pagina de codigo do sistema e os acentos chegam trocados na tela.
 set OPTS=/nologo /target:winexe /platform:anycpu /codepage:65001 /optimize+
-set COMUM=Core.cs Modelo.cs Janela.cs AutoUpdate.cs
+set COMUM=Core.cs Modelo.cs Janela.cs AutoUpdate.cs NativeIntegration.cs
 set CURSORES=/resource:"assets\cursors\marioa\normal.ani",cursor.normal.ani /resource:"assets\cursors\marioa\help.ani",cursor.help.ani /resource:"assets\cursors\marioa\background.ani",cursor.background.ani /resource:"assets\cursors\marioa\busy.ani",cursor.busy.ani /resource:"assets\cursors\marioa\precision.ani",cursor.precision.ani /resource:"assets\cursors\marioa\text.ani",cursor.text.ani /resource:"assets\cursors\marioa\handwriting.ani",cursor.handwriting.ani /resource:"assets\cursors\marioa\unavailable.ani",cursor.unavailable.ani /resource:"assets\cursors\marioa\resize-vertical.ani",cursor.resize-vertical.ani /resource:"assets\cursors\marioa\resize-horizontal.ani",cursor.resize-horizontal.ani /resource:"assets\cursors\marioa\resize-diagonal-1.ani",cursor.resize-diagonal-1.ani /resource:"assets\cursors\marioa\resize-diagonal-2.ani",cursor.resize-diagonal-2.ani /resource:"assets\cursors\marioa\move.ani",cursor.move.ani /resource:"assets\cursors\marioa\alternate.ani",cursor.alternate.ani /resource:"assets\cursors\marioa\link.ani",cursor.link.ani /resource:"assets\cursors\marioa\location.ani",cursor.location.ani /resource:"assets\cursors\marioa\person.ani",cursor.person.ani
 
 cd /d "%~dp0"

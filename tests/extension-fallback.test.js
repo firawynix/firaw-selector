@@ -5,6 +5,7 @@ const vm = require("node:vm");
 const script = fs.readFileSync("extensions/shared/content.js", "utf8");
 
 function simulaClique(resposta, preferencias = {}) {
+  let respostaAtual = resposta;
   let aoClicar;
   let mudou;
   let chamadas = 0;
@@ -40,9 +41,8 @@ function simulaClique(resposta, preferencias = {}) {
       lastError: null,
       sendMessage: (mensagem, callback) => {
         chamadas++;
-        callback(mensagem.type === "firaw-protocol"
-          ? { ok: true, protocol: "firawselector://open/?url=" + encodeURIComponent(mensagem.url) }
-          : resposta);
+        assert.equal(mensagem.type, "firaw-open");
+        callback(respostaAtual);
       }
     },
     storage: {
@@ -77,6 +77,7 @@ function simulaClique(resposta, preferencias = {}) {
   }); }
   clica();
   return { elementos, gravados, clica, mudou,
+    conecta() { respostaAtual = { ok: true }; },
     get navegou() { return navegou; }, get chamadas() { return chamadas; },
     get href() { return atributos.href; }, get target() { return atributos.target; },
     get preveniu() { return preveniu; } };
@@ -95,18 +96,28 @@ linkStore.eventos.click({ isTrusted: false, preventDefault() {} });
 assert.equal(Object.keys(teste.gravados).length, 0, "Clique sintético não salva escolha");
 linkStore.eventos.click({ isTrusted: true });
 assert.equal(teste.gravados["siteRoute:https://origem.example"], "store");
+teste.conecta();
 teste.clica();
 assert.equal(teste.chamadas, 2, "Site lembrado encaminha cada clique pelo background");
-assert.equal(teste.navegou, linkStore.href);
+assert.equal(teste.navegou, undefined, "Ponte nativa não depende de navegação externa do browser");
+assert.equal(teste.elementos.length, 1, "Ponte conectada não repete a janela extra");
 assert.equal(teste.preveniu, true);
 assert.equal(teste.href, "https://example.com/a?x=1&y=2");
 assert.equal(teste.target, "_blank", "Os atributos da página não são alterados");
 teste.clica({ shiftKey: true });
 assert.equal(teste.chamadas, 3, "Shift permite rever a escolha");
 
-const restaurado = simulaClique(null, { "siteRoute:https://origem.example": "store" });
+const restaurado = simulaClique({ ok: true }, { "siteRoute:https://origem.example": "store" });
 assert.equal(restaurado.chamadas, 1);
-assert.equal(restaurado.navegou, linkStore.href);
+assert.equal(restaurado.navegou, undefined);
+assert.equal(restaurado.elementos.length, 0);
+const ponteAusente = simulaClique({ ok: false, error: "Host ausente" },
+  { "siteRoute:https://origem.example": "store" });
+const avisoSalvo = ponteAusente.elementos[0];
+assert.equal(avisoSalvo.children.find((filho) => filho.tag === "label").children[0].checked,
+  true, "Falha da ponte não desmarca uma preferência já salva");
+assert.match(avisoSalvo.children.find((filho) => filho.tag === "p").textContent,
+  /escolha.*salva/i, "O aviso distingue falha de integração de escolha esquecida");
 restaurado.clica({ isTrusted: false });
 assert.equal(restaurado.chamadas, 1, "Clique sintético não abre aplicativo externo");
 restaurado.clica();
