@@ -114,13 +114,25 @@
     // Shift permite escolher de novo sem apagar a preferência salva.
     if (rota === "normal" && !evento.shiftKey) return;
 
-    evento.preventDefault();
-    evento.stopImmediatePropagation();
     if (rota === "store" && !evento.shiftKey) {
-      // Mantém a ativação dentro do clique real, sem esperar a ponte nativa.
-      location.assign(protocolo(destino.href));
+      // Opera pode ignorar location.assign para protocolos externos em painéis
+      // laterais. Deixa o navegador seguir o próprio link do clique confiável.
+      const atributos = ["href", "target", "download"];
+      const originais = atributos.map((nome) => link.getAttribute(nome));
+      link.setAttribute("href", protocolo(destino.href));
+      link.removeAttribute("target");
+      link.removeAttribute("download");
+      evento.stopImmediatePropagation();
+      setTimeout(() => {
+        atributos.forEach((nome, i) => {
+          if (originais[i] === null) link.removeAttribute(nome);
+          else link.setAttribute(nome, originais[i]);
+        });
+      }, 0);
       return;
     }
+    evento.preventDefault();
+    evento.stopImmediatePropagation();
     entrega(destino.href);
   }
 

@@ -34,9 +34,14 @@ alterar apenas o manifesto da extensão não recria o host ausente.
 
 1.1.13: manifesto MSIX registra `firawselector://open/?url=...` →
 `Programa.LinkDoProtocolo()` aceita só HTTP(S) → segue as regras existentes.
-Extensão 1.1.1: falha nativa mostra link real para protocolo + caixa lembrar.
+Extensão 1.1.2: falha nativa mostra link real para protocolo + caixa lembrar.
 `content.js`: `storage.local` guarda `siteRoute:<origin>` = store/normal;
 cache no clique preserva gesto; `onChanged` atualiza abas abertas.
+Opera/WhatsApp lateral: usuário relatou que rota lembrada via location.assign
+não ativava seletor. Caminho lembrado reescreve temporariamente o href do link
+original e mantém ação padrão do clique; restaura href/target/download depois.
+Teste automático confirma ação padrão, ausência de assign e restauração.
+Teste interativo dessa correção ainda pendente.
 `options.html/js`: popup permite trocar/esquecer por site de origem.
 Origem é o site onde clicou; regras no Studio são para o destino/perfil.
 Permissão de abrir aplicativo externo pertence ao navegador.

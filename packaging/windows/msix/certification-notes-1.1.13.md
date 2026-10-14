@@ -39,7 +39,7 @@ this browser for example.com” and a browser. The next example.com link uses
 that choice. Review rules and remembered sites in Studio. No account,
 credentials, elevation, or server access is needed for this flow.
 
-With extension 1.1.1, click a link in an ordinary HTTP(S) page. If the native
+With extension 1.1.2, click a link in an ordinary HTTP(S) page. If the native
 host is absent, select the Store option in the extension's prompt. Select
 “Remember for this site” to reuse that method for future clicks from the
 same source origin. The extension settings allow changing or forgetting
